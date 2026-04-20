@@ -1,0 +1,45 @@
+# macOS
+.DS_Store
+
+# Swift / Xcode
+.build/
+.swiftpm/
+.xcbuild/
+Package.resolved
+*.xcodeproj/
+*.xcworkspace/
+DerivedData/
+
+# Python
+**/__pycache__/
+**/*.py[oc]
+**/.venv/
+**/.ruff_cache/
+**/.pytest_cache/
+**/.mypy_cache/
+build/
+dist/
+wheels/
+*.egg-info/
+
+# Model outputs / artifacts
+outputs/
+*.wav
+models/
+
+# Editor
+**/.vscode/*
+.idea/
+*.sw?
+
+# Claude related
+**/.env
+src.md
+**/CLAUDE.md
+**/.claude
+**/AGENTS.md
+**/.agent/
+REPOMAP.md
+CODEGUIDE.md
+**/.cursor
+.mcp.json

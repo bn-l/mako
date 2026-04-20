@@ -1,0 +1,26 @@
+mac-tts
+
+This product includes the following third-party components.
+
+------------------------------------------------------------
+
+kokorog2p (Apache-2.0)
+https://github.com/holgern/kokorog2p
+
+Portions of the English G2P pipeline and the bundled English
+pronunciation dictionaries (Sources/TTSHarnessCore/Resources/kokorog2p/
+us_gold.json, us_silver.json) are adapted from kokorog2p v0.6.7.
+
+See ThirdPartyLicenses/kokorog2p/LICENSE for the full licence text.
+
+------------------------------------------------------------
+
+misaki (Apache-2.0)
+https://github.com/hexgrad/misaki
+
+The English pronunciation dictionaries used by this project (via
+kokorog2p) derive from Misaki by hexgrad.
+
+See ThirdPartyLicenses/misaki/LICENSE for the full licence text.
+
+------------------------------------------------------------
