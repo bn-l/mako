@@ -1,0 +1,69 @@
+[project]
+name = "mac-tts-python"
+version = "0.0.1"
+description = "Python runners for MLX/CoreML TTS models invoked by the Swift harness"
+readme = "README.md"
+requires-python = "==3.13.*"
+dependencies = [
+    "huggingface-hub>=1.11.0",
+    "mistral-common>=1.11.0",
+    "mlx-audio>=0.4.2",
+    "mlx-lm>=0.31.1",
+    "mlx-speech>=0.4.0",
+    "numpy>=2.4.4",
+    "safetensors>=0.7.0",
+    "soundfile>=0.13.1",
+]
+
+
+[build-system]
+requires = ["uv_build>=0.10.9,<0.11.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "espeakng-loader>=0.2.4",
+    "phonemizer>=3.3.0",
+    "pyright>=1.1.407",
+    "pytest>=9.0.2",
+    "ruff>=0.14.10",
+]
+
+
+[tool.ruff]
+line-length = 88
+indent-width = 4
+target-version = "py313"
+exclude = ["*.md"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # Pyflakes
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "I",   # isort
+    "N",   # pep8-naming
+    "TCH", # flake8-type-checking
+    "FA",  # flake8-future-annotations
+]
+ignore = [
+    "E501", # Line too long
+    "F401", # Unused imports
+    "F841", # Unused vars
+]
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-v --tb=short"
