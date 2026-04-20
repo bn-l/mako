@@ -1,0 +1,199 @@
+HOMOGRAPH FIXTURE CORPUS
+========================
+
+Phase 0 regression fixture for the kokorog2p port (Phase 2 POS-aware lookup).
+Every ambiguous word below is exercised in ≥2 disambiguating contexts. The
+expected pronunciations are annotated in parentheses using the IPA our gold
+dict would return under the listed POS.
+
+=== read (VBD/VBN /ɹɛd/ vs VBP/DEFAULT /ɹid/) ===
+I read (/ɹɛd/) the letter yesterday before dinner.
+She had read (/ɹɛd/) every book on the shelf.
+I read (/ɹid/) the newspaper every morning.
+They read (/ɹid/) aloud from the script.
+
+=== wound (VBD/VBN /waʊnd/ vs VBP/DEFAULT /wuːnd/) ===
+He wound (/waʊnd/) the clock before bed.
+The rope was wound (/waʊnd/) tightly around the post.
+The wound (/wuːnd/) on her arm needed stitches.
+A deep wound (/wuːnd/) can take weeks to heal.
+
+=== live (ADJ /laɪv/ vs VERB /lɪv/) ===
+They broadcast the live (/laɪv/) concert nationwide.
+A live (/laɪv/) wire fell into the road.
+We live (/lɪv/) in a small apartment near the park.
+Cats live (/lɪv/) longer than most dogs.
+
+=== wind (NOUN /wɪnd/ vs VERB /waɪnd/) ===
+The wind (/wɪnd/) blew across the field.
+A strong wind (/wɪnd/) toppled the fence.
+She will wind (/waɪnd/) the thread onto a spool.
+Wind (/waɪnd/) the yarn loosely around the cardboard.
+
+=== lead (NOUN /lɛd/ vs VERB /liːd/) ===
+The pipes were made of lead (/lɛd/).
+Pencil lead (/lɛd/) smudges easily.
+Let me lead (/liːd/) the way out of here.
+Managers lead (/liːd/) by example in this company.
+
+=== tear (NOUN /tɪər/ vs VERB /tɛər/) ===
+A single tear (/tɪər/) ran down her cheek.
+The baby wiped a tear (/tɪər/) from its eye.
+Please do not tear (/tɛər/) the paper.
+He will tear (/tɛər/) the ticket in half.
+
+=== bass (NOUN-fish /bæs/ vs NOUN-music /beɪs/) ===
+The fisherman caught a large bass (/bæs/).
+She grilled the bass (/bæs/) with lemon.
+He plays bass (/beɪs/) in the jazz quartet.
+The bass (/beɪs/) line carried the whole song.
+
+=== bow (NOUN-weapon /boʊ/ vs VERB-gesture /baʊ/) ===
+She drew the bow (/boʊ/) across the violin strings.
+Use a bow (/boʊ/) and arrow to hunt.
+The dancers bow (/baʊ/) at the end of the show.
+Please bow (/baʊ/) your head in prayer.
+
+=== close (ADJ /kloʊs/ vs VERB /kloʊz/) ===
+The two towns are close (/kloʊs/) together.
+She stood close (/kloʊs/) to the window.
+Please close (/kloʊz/) the door behind you.
+Banks close (/kloʊz/) early on Saturdays.
+
+=== present (NOUN/ADJ /ˈprɛzənt/ vs VERB /prɪˈzɛnt/) ===
+They opened each present (/ˈprɛzənt/) on Christmas morning.
+The present (/ˈprɛzənt/) situation is tense.
+I will present (/prɪˈzɛnt/) my findings tomorrow.
+Consultants present (/prɪˈzɛnt/) their reports to the board.
+
+=== record (NOUN /ˈrɛkərd/ vs VERB /rɪˈkɔrd/) ===
+She broke the world record (/ˈrɛkərd/) last year.
+The record (/ˈrɛkərd/) was spinning on the turntable.
+We record (/rɪˈkɔrd/) every meeting for review.
+Please record (/rɪˈkɔrd/) the next episode for me.
+
+=== contract (NOUN /ˈkɒntrækt/ vs VERB /kənˈtrækt/) ===
+He signed the contract (/ˈkɒntrækt/) in blue ink.
+The contract (/ˈkɒntrækt/) expires in May.
+Muscles contract (/kənˈtrækt/) when stimulated.
+Metals contract (/kənˈtrækt/) as they cool.
+
+=== object (NOUN /ˈɒbdʒɪkt/ vs VERB /əbˈdʒɛkt/) ===
+Name one object (/ˈɒbdʒɪkt/) on the desk.
+The object (/ˈɒbdʒɪkt/) is the verb's target.
+I object (/əbˈdʒɛkt/) to that line of questioning.
+They object (/əbˈdʒɛkt/) to the proposed fee.
+
+=== subject (NOUN /ˈsʌbdʒɪkt/ vs VERB /səbˈdʒɛkt/) ===
+History is her favourite subject (/ˈsʌbdʒɪkt/).
+Every email subject (/ˈsʌbdʒɪkt/) line matters.
+They subject (/səbˈdʒɛkt/) candidates to extensive testing.
+New recruits subject (/səbˈdʒɛkt/) themselves to long drills.
+
+=== conduct (NOUN /ˈkɒndʌkt/ vs VERB /kənˈdʌkt/) ===
+His conduct (/ˈkɒndʌkt/) in court was exemplary.
+The code of conduct (/ˈkɒndʌkt/) was rewritten.
+She will conduct (/kənˈdʌkt/) the orchestra tonight.
+Researchers conduct (/kənˈdʌkt/) interviews in the lab.
+
+=== desert (NOUN /ˈdɛzərt/ vs VERB /dɪˈzɜrt/) ===
+The Sahara desert (/ˈdɛzərt/) spans several countries.
+A cactus grows in the desert (/ˈdɛzərt/).
+Do not desert (/dɪˈzɜrt/) your post.
+Soldiers who desert (/dɪˈzɜrt/) face court-martial.
+
+=== perfect (ADJ /ˈpɜrfɪkt/ vs VERB /pərˈfɛkt/) ===
+This is the perfect (/ˈpɜrfɪkt/) spot for a picnic.
+Her perfect (/ˈpɜrfɪkt/) handwriting impressed the class.
+She will perfect (/pərˈfɛkt/) her technique over years.
+Craftsmen perfect (/pərˈfɛkt/) their art with practice.
+
+=== project (NOUN /ˈprɒdʒɛkt/ vs VERB /prəˈdʒɛkt/) ===
+The project (/ˈprɒdʒɛkt/) is behind schedule.
+Our next project (/ˈprɒdʒɛkt/) ships in March.
+Models project (/prəˈdʒɛkt/) sales will rise.
+Analysts project (/prəˈdʒɛkt/) a downturn next year.
+
+=== progress (NOUN /ˈprɒɡrɛs/ vs VERB /prəˈɡrɛs/) ===
+The progress (/ˈprɒɡrɛs/) report is due Friday.
+Steady progress (/ˈprɒɡrɛs/) beats a sudden sprint.
+Let the case progress (/prəˈɡrɛs/) through the courts.
+Trainees progress (/prəˈɡrɛs/) through the levels slowly.
+
+=== increase (NOUN /ˈɪnkriːs/ vs VERB /ɪnˈkriːs/) ===
+The increase (/ˈɪnkriːs/) in rent shocked tenants.
+A small increase (/ˈɪnkriːs/) in pay arrived this month.
+Prices increase (/ɪnˈkriːs/) every quarter.
+Sales increase (/ɪnˈkriːs/) during the holiday season.
+
+=== permit (NOUN /ˈpɜrmɪt/ vs VERB /pərˈmɪt/) ===
+The parking permit (/ˈpɜrmɪt/) is on the dashboard.
+Without a valid permit (/ˈpɜrmɪt/) you cannot enter.
+Regulations permit (/pərˈmɪt/) two pets per unit.
+The bylaws permit (/pərˈmɪt/) late filings this year.
+
+=== refuse (NOUN /ˈrɛfjuːs/ vs VERB /rɪˈfjuːz/) ===
+Refuse (/ˈrɛfjuːs/) is collected on Tuesdays.
+The refuse (/ˈrɛfjuːs/) bin is around the corner.
+I refuse (/rɪˈfjuːz/) to answer that question.
+Witnesses refuse (/rɪˈfjuːz/) to testify without counsel.
+
+=== invalid (ADJ /ɪnˈvælɪd/ vs NOUN /ˈɪnvəlɪd/) ===
+The password is invalid (/ɪnˈvælɪd/).
+An invalid (/ɪnˈvælɪd/) signature voids the form.
+Care for the invalid (/ˈɪnvəlɪd/) in Room 4.
+The invalid (/ˈɪnvəlɪd/) asked for water at noon.
+
+=== minute (NOUN /ˈmɪnɪt/ vs ADJ /maɪˈnjuːt/) ===
+Wait one minute (/ˈmɪnɪt/) longer.
+Every minute (/ˈmɪnɪt/) counts in an emergency.
+A minute (/maɪˈnjuːt/) quantity of poison was detected.
+Minute (/maɪˈnjuːt/) details matter in microscopy.
+
+=== used (VBD-past /juːzd/ vs ADJ-accustomed /juːst/) ===
+She used (/juːzd/) every remaining staple.
+The mechanic used (/juːzd/) a torque wrench.
+We are used (/juːst/) to the early shifts.
+He is used (/juːst/) to working weekends.
+
+=== close (VERB /kloʊz/ vs ADJ /kloʊs/ — second pair for robustness) ===
+Please close (/kloʊz/) the window.
+She had to close (/kloʊz/) the account.
+Their house is close (/kloʊs/) to the school.
+A close (/kloʊs/) friend will stay the week.
+
+=== row (NOUN-line /roʊ/ vs NOUN-argument /raʊ/) ===
+Take a seat in the front row (/roʊ/).
+She planted the seeds in a straight row (/roʊ/).
+They had a row (/raʊ/) over the bill.
+Their row (/raʊ/) lasted well into the night.
+
+=== sow (VERB /soʊ/ vs NOUN /saʊ/) ===
+Farmers sow (/soʊ/) seeds in April.
+They sow (/soʊ/) the field every spring.
+The sow (/saʊ/) had eight piglets.
+One sow (/saʊ/) weighs over three hundred pounds.
+
+=== does (VERB /dʌz/ vs NOUN-plural-of-doe /doʊz/) ===
+He does (/dʌz/) the dishes every night.
+The chef does (/dʌz/) the prep work herself.
+Three does (/doʊz/) grazed in the meadow.
+The does (/doʊz/) are more cautious than the bucks.
+
+=== dove (VBD-dived /doʊv/ vs NOUN-bird /dʌv/) ===
+He dove (/doʊv/) into the pool without hesitation.
+The swimmer dove (/doʊv/) from the high board.
+A dove (/dʌv/) landed on the windowsill.
+The dove (/dʌv/) cooed from the rafters.
+
+=== polish (VERB /ˈpɒlɪʃ/ vs ADJ/NOUN /ˈpoʊlɪʃ/) ===
+Please polish (/ˈpɒlɪʃ/) your shoes before dinner.
+I will polish (/ˈpɒlɪʃ/) the silverware tonight.
+The Polish (/ˈpoʊlɪʃ/) delegation arrived at noon.
+Polish (/ˈpoʊlɪʃ/) cuisine features pierogi and kielbasa.
+
+=== august (NOUN-month /ˈɔːɡəst/ vs ADJ-esteemed /ɔːˈɡʌst/) ===
+August (/ˈɔːɡəst/) is the hottest month.
+By August (/ˈɔːɡəst/) the harvest is under way.
+The august (/ɔːˈɡʌst/) senator rose to speak.
+His august (/ɔːˈɡʌst/) bearing impressed the guests.
