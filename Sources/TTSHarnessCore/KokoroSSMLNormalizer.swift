@@ -53,6 +53,7 @@ public enum KokoroSSMLNormalizer {
         out = wrapRoomCodes(out)
         out = wrapAlphaNumericCodes(out)
         out = wrapInitialisms(out)
+        out = wrapAlphaSlash(out)
         out = applyPennContextOverrides(out)
         if !useCustomLexicon {
             out = applyGoldLexiconOverrides(out)
@@ -87,6 +88,7 @@ public enum KokoroSSMLNormalizer {
         out = wrapRoomCodes(out)
         out = wrapAlphaNumericCodes(out)
         out = wrapInitialisms(out)
+        out = wrapAlphaSlash(out)
         return out
     }
 
@@ -623,6 +625,24 @@ public enum KokoroSSMLNormalizer {
         s = s.replacingOccurrences(of: "&", with: " and ")
         s = s.replacingOccurrences(of: "%", with: " percent ")
         s = s.replacingOccurrences(of: "/", with: " slash ")
+        // Digit runs → spelled-out digits ("101" → "one oh one"); prevents
+        // FluidAudio from reading `reflex101.edu` as "reflex one hundred
+        // one dot edu".
+        if let digitRe = try? NSRegularExpression(pattern: #"\d+"#) {
+            let ns = s as NSString
+            let digitMatches = digitRe.matches(in: s, range: NSRange(location: 0, length: ns.length))
+            for match in digitMatches.reversed() {
+                let run = ns.substring(with: match.range)
+                let words = run.map { ch -> String in
+                    let d = Int(String(ch)) ?? 0
+                    return d == 0 ? "oh" : KokoroNumbers.cardinal(d)
+                }.joined(separator: " ")
+                guard let r = Range(match.range, in: s) else { continue }
+                // Pad with spaces so `reflex101` splits into "reflex one
+                // oh one" — final whitespace collapser trims the excess.
+                s.replaceSubrange(r, with: " \(words) ")
+            }
+        }
         // Collapse whitespace.
         if let wsRe = try? NSRegularExpression(pattern: #"\s+"#) {
             let ns = s as NSString
@@ -839,6 +859,27 @@ public enum KokoroSSMLNormalizer {
             if wordAcronyms.contains(matched) { continue }
             guard let r = Range(match.range, in: out) else { continue }
             out.replaceSubrange(r, with: #"<say-as interpret-as="characters">\#(matched)</say-as>"#)
+        }
+        return out
+    }
+
+    /// `A/B` slash between two single capital letters reads as "A or B" —
+    /// the standard way to disambiguate short option-label notation.
+    /// Bounded by non-alphanumeric on both sides so `I/O` → "I or O" but
+    /// `TCP/IP` (multi-letter) flows through untouched.
+    private static func wrapAlphaSlash(_ text: String) -> String {
+        let pattern = #"(?<![A-Za-z0-9/])([A-Z])/([A-Z])(?![A-Za-z0-9/])"#
+        guard let re = try? NSRegularExpression(pattern: pattern) else { return text }
+        let ns = text as NSString
+        let matches = re.matches(in: text, range: NSRange(location: 0, length: ns.length))
+        var out = text
+        for match in matches.reversed() {
+            guard let r = Range(match.range, in: out) else { continue }
+            let left = ns.substring(with: match.range(at: 1))
+            let right = ns.substring(with: match.range(at: 2))
+            let source = ns.substring(with: match.range)
+            let alias = "\(left) or \(right)"
+            out.replaceSubrange(r, with: #"<sub alias="\#(alias)">\#(source)</sub>"#)
         }
         return out
     }
