@@ -297,16 +297,46 @@ public enum KokoroG2P {
         #"(?:had|have|has|having|been|was|were|be|being|is|are|never|ever|already|just)\s+(?:\w+\s+){0,2}"#
     private static let pastTimeSuffix =
         #"(?=[^.!?;\n]{0,80}?\b(?:yesterday|last\s+(?:night|week|month|year|summer|time)|\w+\s+ago|earlier|this\s+morning)\b)"#
+    /// Narrative-past prefix — widens `read` / `reread` VBD coverage
+    /// beyond the temporal-adverb cue. Requires an earlier finite
+    /// past-tense verb in the same sentence: either a common
+    /// irregular (was/were/had/did/said/went/paid/…), or a word
+    /// ending in `-ed` with at least 3 chars before the suffix
+    /// (filters adjectives like "red", "bed", "sled" while keeping
+    /// past-tense verbs like "walked", "handed", "graded", "asked").
+    /// The sentence-boundary class intentionally excludes `.` —
+    /// money decimals (`$450.00`) and dotted abbreviations (`Mr.`)
+    /// otherwise fragment the scan and hide a legitimate past
+    /// verb behind them. `{0,300}?` caps scan distance to stay
+    /// away from cross-paragraph backtracking.
+    private static let narrativePastVerbs =
+        #"was|were|had|did|said|went|came|took|gave|told|paid|saw|made|found|kept|left|felt|thought|knew|held|brought|taught|caught|bought|heard|ran|sat|stood|understood|became|began|spoke|wrote|sent|lost|got|put|set|cut|hit|\w{3,}ed"#
+    private static let narrativePastPrefix =
+        #"(?:[^!?;\n]{0,300}?\b(?:"# + narrativePastVerbs + #")\b[^!?;\n]*?)"#
+    /// Narrative-past suffix — mirror of the prefix for cases where
+    /// the past-tense cue follows `read` ("Maya read the note aloud
+    /// while the rest of us squirmed"). Lookahead only — doesn't
+    /// extend the match range.
+    private static let narrativePastSuffix =
+        #"(?=[^!?;\n]{0,300}?\b(?:"# + narrativePastVerbs + #")\b)"#
 
     private static let pennContextRules: [PennContextRule] = [
         PennContextRule(word: "read", pos: .verbPastParticiple,
             prefixPattern: pastPerfectPrefix, suffixPattern: nil),
         PennContextRule(word: "read", pos: .verbPastTense,
             prefixPattern: nil, suffixPattern: pastTimeSuffix),
+        PennContextRule(word: "read", pos: .verbPastTense,
+            prefixPattern: narrativePastPrefix, suffixPattern: nil),
+        PennContextRule(word: "read", pos: .verbPastTense,
+            prefixPattern: nil, suffixPattern: narrativePastSuffix),
         PennContextRule(word: "reread", pos: .verbPastParticiple,
             prefixPattern: pastPerfectPrefix, suffixPattern: nil),
         PennContextRule(word: "reread", pos: .verbPastTense,
             prefixPattern: nil, suffixPattern: pastTimeSuffix),
+        PennContextRule(word: "reread", pos: .verbPastTense,
+            prefixPattern: narrativePastPrefix, suffixPattern: nil),
+        PennContextRule(word: "reread", pos: .verbPastTense,
+            prefixPattern: nil, suffixPattern: narrativePastSuffix),
         PennContextRule(word: "used", pos: .verbPastTense,
             prefixPattern: nil, suffixPattern: #"\s+to\b"#),
         PennContextRule(word: "wound", pos: .verbPastTense,
@@ -325,7 +355,7 @@ public enum KokoroG2P {
         for rule in pennContextRules {
             guard let hit = KokoroLexicon.lookup(rule.word, pos: rule.pos) else { continue }
             let escaped = NSRegularExpression.escapedPattern(for: rule.word)
-            let pattern = "\\b\(rule.prefixPattern ?? "")(\(escaped))\(rule.suffixPattern ?? "")\\b"
+            let pattern = "\\b\(rule.prefixPattern ?? "")\\b(\(escaped))\\b\(rule.suffixPattern ?? "")"
             guard let re = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) else {
                 continue
             }
