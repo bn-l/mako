@@ -16,6 +16,10 @@ public enum KokoroNumbers {
         out = wrapCurrency(out)
         out = wrapPercentages(out)
         out = wrapTemperatures(out)
+        // Roman numerals gated by a noun cue ("Chapter V", "Volume III").
+        // Runs before other number handlers — purely alphabetic, so no
+        // interference with digit claims downstream.
+        out = wrapRomanNumerals(out)
         // Dimensions (digit x|× digit) before units so `8.5×11 mg` (if
         // it ever appeared) isn't half-claimed by wrapUnits first.
         out = wrapDimensions(out)
@@ -23,6 +27,9 @@ public enum KokoroNumbers {
         // a year and the range handler doesn't re-frame "1990–1999" as a
         // plain cardinal range.
         out = wrapYears(out)
+        // Course codes (`<Subject> <3 digits>`) after years so
+        // `September 2026` isn't confused with a 3-digit code.
+        out = wrapCourseCodes(out)
         // Ranges (digit – digit) before units so `250–500 ms` is claimed
         // as one span with the trailing unit absorbed, not as two halves.
         out = wrapRanges(out)
@@ -569,6 +576,87 @@ public enum KokoroNumbers {
             guard let r = Range(match.range, in: out) else { continue }
             let source = String(out[r])
             out.replaceSubrange(r, with: #"<sub alias="\#(alias)">\#(source)</sub>"#)
+        }
+        return out
+    }
+
+    // MARK: - Roman numerals
+
+    /// Noun cues that gate Roman-numeral conversion. Without a cue the
+    /// standalone letter "V" or "I" in prose is not a numeral. Kept
+    /// intentionally small; expand only when a new linguistic class
+    /// (not a fixture) justifies a new cue.
+    private static let romanNumeralCues = [
+        "Chapter", "Chapters", "Volume", "Volumes", "Vol", "Part", "Parts",
+        "Act", "Acts", "Book", "Books", "Scene", "Scenes", "Article",
+        "Articles", "Appendix", "Section", "Sections", "Figure", "Figures",
+        "Table", "Tables", "Episode", "Episodes", "Stage", "Stages",
+    ]
+
+    private static func romanToInt(_ s: String) -> Int? {
+        let values: [Character: Int] = [
+            "I": 1, "V": 5, "X": 10, "L": 50,
+            "C": 100, "D": 500, "M": 1000,
+        ]
+        var total = 0
+        var prev = 0
+        for ch in s.reversed() {
+            guard let v = values[ch] else { return nil }
+            if v < prev { total -= v } else { total += v }
+            prev = v
+        }
+        // Reject zero/negative or overflow garbage patterns like `IIII`
+        // which parse to 4 but violate canonical form. We don't enforce
+        // canonicalness — IIII = 4, IIIIII = 6 — just require positive.
+        return total > 0 ? total : nil
+    }
+
+    private static func wrapRomanNumerals(_ text: String) -> String {
+        let cueAlt = romanNumeralCues.joined(separator: "|")
+        let pattern = #"\b(\#(cueAlt))\s+([IVXLCDM]{1,6})\b"#
+        guard let re = try? NSRegularExpression(pattern: pattern) else { return text }
+        let ns = text as NSString
+        let matches = re.matches(in: text, range: NSRange(location: 0, length: ns.length))
+        var out = text
+        for match in matches.reversed() {
+            if insideExistingSub(match.range, in: out) { continue }
+            let numeral = ns.substring(with: match.range(at: 2))
+            guard let n = romanToInt(numeral), n <= 3999 else { continue }
+            guard let r = Range(match.range(at: 2), in: out) else { continue }
+            let alias = cardinal(n)
+            out.replaceSubrange(r, with: #"<sub alias="\#(alias)">\#(numeral)</sub>"#)
+        }
+        return out
+    }
+
+    // MARK: - Course codes
+
+    /// `<Subject> <3-digit>` (e.g. `Reflexology 101`, `BIO 250`) read as
+    /// digit-by-digit with the middle zero spoken as "oh" — the standard
+    /// university-course convention. Gated on a capitalized-word cue so
+    /// arbitrary `<word> 200` in prose doesn't collapse into a code.
+    private static func wrapCourseCodes(_ text: String) -> String {
+        // Cue: capitalized word of 3+ letters. Excludes month names via
+        // lookbehind so `September 2026` can't accidentally match (the
+        // 3-digit guard already rules out 4-digit years).
+        let pattern = #"(?<![A-Za-z])([A-Z][A-Za-z]{2,})\s+(\d{3})(?![0-9A-Za-z])"#
+        guard let re = try? NSRegularExpression(pattern: pattern) else { return text }
+        let ns = text as NSString
+        let matches = re.matches(in: text, range: NSRange(location: 0, length: ns.length))
+        var out = text
+        for match in matches.reversed() {
+            if insideExistingSub(match.range, in: out) { continue }
+            let digits = ns.substring(with: match.range(at: 2))
+            guard digits.count == 3,
+                  let r = Range(match.range(at: 2), in: out) else { continue }
+            let d = Array(digits)
+            let d1 = cardinal(Int(String(d[0])) ?? 0)
+            let d2Raw = Int(String(d[1])) ?? 0
+            let d2 = d2Raw == 0 ? "oh" : cardinal(d2Raw)
+            let d3Raw = Int(String(d[2])) ?? 0
+            let d3 = d3Raw == 0 ? "oh" : cardinal(d3Raw)
+            let alias = "\(d1) \(d2) \(d3)"
+            out.replaceSubrange(r, with: #"<sub alias="\#(alias)">\#(digits)</sub>"#)
         }
         return out
     }
