@@ -1,0 +1,1 @@
+- 1 | 2026-04-17 19:34:30: speech-swift's Qwen3TTS (MLX) hardcodes aufklarer/* repos; its Qwen3TTSCoreML expects TextProjector/CodeEmbedder layout whereas FluidInference/qwen3-tts-coreml has qwen3_tts_lm_prefill_v9 layout. Neither covers our specific mlx-community bf16 or FluidInference CoreML targets, so Python path stands.

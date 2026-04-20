@@ -1,0 +1,1 @@
+- 1 | 2026-04-17 19:34:34: majentik Voxtral quants ship only LM weights (mlx-lm quant w/ KV-cache profile). Runner loads full Voxtral from mlx-community/Voxtral-4B-TTS-2603-mlx-4bit, overlays language_model.* from majentik via tree_unflatten, then Model.generate. Untested — needs real download to validate key prefixes.
