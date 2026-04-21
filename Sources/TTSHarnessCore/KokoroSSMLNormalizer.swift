@@ -875,10 +875,10 @@ public enum KokoroSSMLNormalizer {
         return out
     }
 
-    /// `A/B` slash between two single capital letters reads as "A or B" —
-    /// the standard way to disambiguate short option-label notation.
-    /// Bounded by non-alphanumeric on both sides so `I/O` → "I or O" but
-    /// `TCP/IP` (multi-letter) flows through untouched.
+    /// `A/B` slash between two single capital letters reads literally —
+    /// "A slash B". English speakers pronounce the character; semantic
+    /// "or" reading is an author's choice. Multi-letter pairs (TCP/IP)
+    /// flow through untouched.
     private static func wrapAlphaSlash(_ text: String) -> String {
         let pattern = #"(?<![A-Za-z0-9/])([A-Z])/([A-Z])(?![A-Za-z0-9/])"#
         guard let re = try? NSRegularExpression(pattern: pattern) else { return text }
@@ -890,7 +890,7 @@ public enum KokoroSSMLNormalizer {
             let left = ns.substring(with: match.range(at: 1))
             let right = ns.substring(with: match.range(at: 2))
             let source = ns.substring(with: match.range)
-            let alias = "\(left) or \(right)"
+            let alias = "\(left) slash \(right)"
             out.replaceSubrange(r, with: #"<sub alias="\#(alias)">\#(source)</sub>"#)
         }
         return out
