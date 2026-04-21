@@ -14,6 +14,10 @@ public enum KokoroSSMLNormalizer {
 
     public static func normalize(_ text: String) -> String {
         var out = text
+        // Parenthetical asides → em-dash clauses. FluidAudio's TtsTextPreprocessor
+        // drops bare parens, so `(x)` in source renders with no audible pause
+        // cue. Em-dashes survive and Kokoro realizes them as prosodic pauses.
+        out = wrapParentheticals(out)
         // Email/URL must run before any handler that might touch their punctuation.
         out = wrapEmails(out)
         out = wrapURLs(out)
@@ -74,6 +78,7 @@ public enum KokoroSSMLNormalizer {
     /// so any ordering invariants between stages hold.
     public static func compensatorsOnly(_ text: String) -> String {
         var out = text
+        out = wrapParentheticals(out)
         out = wrapEmails(out)
         out = wrapURLs(out)
         out = wrapPhoneNumbers(out)
@@ -894,6 +899,39 @@ public enum KokoroSSMLNormalizer {
             out.replaceSubrange(r, with: #"<sub alias="\#(alias)">\#(source)</sub>"#)
         }
         return out
+    }
+
+    /// Rewrite `(aside)` to `— aside —`. FluidAudio's preprocessor drops
+    /// parens with no pause cue; em-dashes survive and Kokoro emits a
+    /// prosodic pause around them. Skips markdown IPA `[word](/…/)` by
+    /// requiring neither the preceding character is `]` nor the inner
+    /// content begins with `/`. When `)` is followed by sentence-ending
+    /// punctuation (`. ? !`), the trailing em-dash is dropped so we don't
+    /// emit `— .` — the period already carries the pause. Nested parens
+    /// are intentionally left untouched (no known nesting in fixtures).
+    private static func wrapParentheticals(_ text: String) -> String {
+        let pattern = #"(?<!\])\(([^()]+)\)"#
+        guard let re = try? NSRegularExpression(pattern: pattern) else { return text }
+        let ns = text as NSString
+        let matches = re.matches(in: text, range: NSRange(location: 0, length: ns.length))
+        var out = text as NSString
+        let sentenceEnders: Set<Character> = [".", "!", "?"]
+        for match in matches.reversed() {
+            let inner = ns.substring(with: match.range(at: 1))
+            if inner.first == "/" { continue }
+            let afterIdx = match.range.location + match.range.length
+            let followed: Character? = afterIdx < out.length
+                ? Character(out.substring(with: NSRange(location: afterIdx, length: 1)))
+                : nil
+            let replacement: String
+            if let c = followed, sentenceEnders.contains(c) {
+                replacement = "— \(inner)"
+            } else {
+                replacement = "— \(inner) —"
+            }
+            out = out.replacingCharacters(in: match.range, with: replacement) as NSString
+        }
+        return out as String
     }
 
     // MARK: - "read" past-tense disambiguation
