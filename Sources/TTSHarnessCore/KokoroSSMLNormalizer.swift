@@ -234,6 +234,18 @@ public enum KokoroSSMLNormalizer {
         "Maya", "Worcestershire", "colonel", "Colonel",
         "kettle", "choir", "iron", "rural", "squirrel", "February",
         "boil",
+        // Proper-noun classes the G2P mispronounces out of the box. Each
+        // entry must be in us_gold/us_silver; the lookup fails silently
+        // (no wrap) otherwise so there's no risk of emitting stale IPA.
+        // Classes: US populated-place names, Spanish/Portuguese surnames
+        // (diacritic-folded lookup handles "Márquez" → "marquez"), and
+        // Celtic surnames that aren't caught by the O'/Mc/Mac regex.
+        "Angeles", "Louisville", "Worcester", "Moines",
+        "Márquez", "Marquez", "García", "Garcia",
+        "Hernández", "Hernandez", "Rodríguez", "Rodriguez",
+        "González", "Gonzalez", "Pérez", "Perez",
+        "Ramírez", "Ramirez", "Núñez", "Nunez",
+        "López", "Lopez",
     ]
 
     /// Extra words to override when `KOKORO_GOLD_AGGRESSIVE=1`. These are
