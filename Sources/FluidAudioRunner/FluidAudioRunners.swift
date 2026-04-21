@@ -14,12 +14,11 @@ public struct KokoroFluidAudioRunner: Runner {
     public func synthesize(text: String, to outputURL: URL) async throws {
         let env = ProcessInfo.processInfo.environment
         let rawPassthrough = env["KOKORO_RAW_TEXT"] != nil
-        // Phase 8 toggle. `ported` runs the new `KokoroG2P.resolve` →
-        // `emit` → `compensatorsOnly` pipeline; anything else (including
-        // unset) stays on the legacy `KokoroSSMLNormalizer.normalize` +
-        // `buildCustomLexiconIfEnabled` path until Phase 9 listen-passes
-        // clear. `KOKORO_RAW_TEXT` still short-circuits both.
-        let portedG2P = env["KOKORO_G2P"] == "ported"
+        // Phase 9b closeout: ported is the default; `KOKORO_G2P=classic`
+        // is the escape hatch back to the legacy
+        // `KokoroSSMLNormalizer.normalize` + `buildCustomLexiconIfEnabled`
+        // path. `KOKORO_RAW_TEXT` still short-circuits both.
+        let portedG2P = env["KOKORO_G2P"] != "classic"
         let lexicon: TtsCustomLexicon?
         let normalized: String
         if rawPassthrough {
