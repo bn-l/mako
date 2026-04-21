@@ -245,6 +245,13 @@ extension KokoroLexicon {
             if let hit = entries[word] { return hit }
             let lower = word.lowercased()
             if lower != word, let hit = entries[lower] { return hit }
+            // Diacritic-insensitive fallback: `Márquez` → `Marquez`, `naïve`
+            // → `naive`. The English-centric dict stores unaccented forms;
+            // proper nouns entering as accented would otherwise miss.
+            let folded = word.folding(options: .diacriticInsensitive, locale: nil)
+            if folded != word, folded != lower, let hit = entries[folded] { return hit }
+            let foldedLower = folded.lowercased()
+            if foldedLower != folded, foldedLower != lower, let hit = entries[foldedLower] { return hit }
             return nil
         }
 
