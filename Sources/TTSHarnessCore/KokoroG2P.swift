@@ -320,6 +320,16 @@ public enum KokoroG2P {
     private static let narrativePastSuffix =
         #"(?=[^!?;\n]{0,300}?\b(?:"# + narrativePastVerbs + #")\b)"#
 
+    /// Subject-prefix for the narrative-past suffix rule. Required
+    /// to block sentence-initial imperative "Read everything clearly"
+    /// from getting rewritten as VBD just because a past-tense verb
+    /// sits in a following clause ("…, she told the team"). A VBD
+    /// "read" always has an explicit subject immediately before it;
+    /// an imperative does not. The subject class is: personal pronoun,
+    /// WH-relative, or a capitalised proper-noun token.
+    private static let narrativePastSubjectPrefix =
+        #"(?:she|he|they|we|I|you|it|who|which|that|[A-Z][a-z]+)\s+"#
+
     private static let pennContextRules: [PennContextRule] = [
         PennContextRule(word: "read", pos: .verbPastParticiple,
             prefixPattern: pastPerfectPrefix, suffixPattern: nil),
@@ -328,7 +338,7 @@ public enum KokoroG2P {
         PennContextRule(word: "read", pos: .verbPastTense,
             prefixPattern: narrativePastPrefix, suffixPattern: nil),
         PennContextRule(word: "read", pos: .verbPastTense,
-            prefixPattern: nil, suffixPattern: narrativePastSuffix),
+            prefixPattern: narrativePastSubjectPrefix, suffixPattern: narrativePastSuffix),
         PennContextRule(word: "reread", pos: .verbPastParticiple,
             prefixPattern: pastPerfectPrefix, suffixPattern: nil),
         PennContextRule(word: "reread", pos: .verbPastTense,
@@ -336,7 +346,7 @@ public enum KokoroG2P {
         PennContextRule(word: "reread", pos: .verbPastTense,
             prefixPattern: narrativePastPrefix, suffixPattern: nil),
         PennContextRule(word: "reread", pos: .verbPastTense,
-            prefixPattern: nil, suffixPattern: narrativePastSuffix),
+            prefixPattern: narrativePastSubjectPrefix, suffixPattern: narrativePastSuffix),
         PennContextRule(word: "used", pos: .verbPastTense,
             prefixPattern: nil, suffixPattern: #"\s+to\b"#),
         PennContextRule(word: "wound", pos: .verbPastTense,
