@@ -53,7 +53,9 @@ public struct KokoroFluidAudioRunner: Runner {
             )
             return
         }
-        try await manager.synthesizeToFile(text: normalized, outputURL: outputURL, voice: voice)
+        let voiceSpeed = Float(env["KOKORO_SPEED"] ?? "") ?? 1.0
+        try await manager.synthesizeToFile(
+            text: normalized, outputURL: outputURL, voice: voice, voiceSpeed: voiceSpeed)
     }
 
     /// Emits a three-stage trace to stderr, then writes the audio to `outputURL`.
