@@ -3,7 +3,7 @@ import Foundation
 public enum Passage {
     /// Built-in passages shipped in `Resources/`. Reference them by name (e.g. `"gulliver"`).
     public static let bundledNames: [String] = [
-        "gulliver", "maya", "trouble", "quiet-house", "death-blow", "micro-corpus", "brutal", "foot-massage", "reflexology-class",
+        "gulliver", "micro-corpus", "brutal", "foot-massage",
     ]
     public static let defaultName = "gulliver"
 

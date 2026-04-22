@@ -9,7 +9,7 @@ import TTSHarnessCore
 /// tool exists to compare voices and speeds on the same passage, not to
 /// validate normalization, so the bypass keeps the baseline comparable
 /// across renders regardless of which pipeline the main runner uses.
-/// Any A/B against `mac-tts run` will differ on normalization, not only
+/// Any A/B against `mac-tts dev run` will differ on normalization, not only
 /// on voice/speed.
 struct KokoroMatrix: AsyncParsableCommand {
     static let configuration = CommandConfiguration(

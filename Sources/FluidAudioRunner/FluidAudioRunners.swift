@@ -11,6 +11,41 @@ public struct KokoroFluidAudioRunner: Runner {
         self.voice = voice
     }
 
+    /// In-memory variant of `synthesize(text:to:)`: returns the full WAV
+    /// bytes instead of writing to disk. Matches the file path's
+    /// normalization / lexicon behaviour exactly — same R7 pipeline —
+    /// but skips the trace/preview branches (those are dev-only) and
+    /// avoids the temp-file round-trip when the caller wants to pipe the
+    /// audio elsewhere (e.g. into ffmpeg stdin for M4A transcoding).
+    public func synthesizeData(text: String) async throws -> Data {
+        let (normalized, lexicon) = Self.normalize(text: text)
+        let manager = KokoroTtsManager(defaultVoice: voice, customLexicon: lexicon)
+        try await manager.initialize()
+        let env = ProcessInfo.processInfo.environment
+        let voiceSpeed = Float(env["KOKORO_SPEED"] ?? "") ?? 1.0
+        return try await manager.synthesize(text: normalized, voice: voice, voiceSpeed: voiceSpeed)
+    }
+
+    /// Shared normalization path used by both `synthesize(text:to:)` and
+    /// `synthesizeData(text:)`. Ported G2P is default; `KOKORO_G2P=classic`
+    /// falls back to the legacy normalizer; `KOKORO_RAW_TEXT` skips both.
+    private static func normalize(text: String) -> (String, TtsCustomLexicon?) {
+        let env = ProcessInfo.processInfo.environment
+        if env["KOKORO_RAW_TEXT"] != nil {
+            return (text, nil)
+        }
+        let portedG2P = env["KOKORO_G2P"] != "classic"
+        if portedG2P {
+            let plan = KokoroG2P.resolve(text)
+            let emitted = KokoroG2P.emit(plan)
+            let lexicon = emitted.lexiconEntries.isEmpty
+                ? nil
+                : TtsCustomLexicon(entries: emitted.lexiconEntries)
+            return (KokoroSSMLNormalizer.compensatorsOnly(emitted.annotatedText), lexicon)
+        }
+        return (KokoroSSMLNormalizer.normalize(text), buildCustomLexiconIfEnabled(for: text))
+    }
+
     public func synthesize(text: String, to outputURL: URL) async throws {
         let env = ProcessInfo.processInfo.environment
         let rawPassthrough = env["KOKORO_RAW_TEXT"] != nil
@@ -243,22 +278,5 @@ public struct KokoroFluidAudioRunner: Runner {
             lines += "  \(tier.rawValue): \(hits)\n"
         }
         FileHandle.standardError.write(Data(lines.utf8))
-    }
-}
-
-public struct PocketFluidAudioRunner: Runner {
-    public let modelID = "pocket-tts-fluidaudio"
-    public let sampleRate = 24_000
-    public let voice: String
-
-    public init(voice: String = "alba") {
-        self.voice = voice
-    }
-
-    public func synthesize(text: String, to outputURL: URL) async throws {
-        let manager = PocketTtsManager(defaultVoice: voice)
-        try await manager.initialize()
-        let normalized = KittenWordNormalizer.normalizeText(text)
-        try await manager.synthesizeToFile(text: normalized, outputURL: outputURL, voice: voice)
     }
 }

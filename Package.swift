@@ -14,7 +14,6 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.7.1"),
         .package(url: "https://github.com/FluidInference/FluidAudio.git", from: "0.13.6"),
         .package(url: "https://github.com/soniqo/speech-swift.git", from: "0.0.9"),
-        .package(url: "https://github.com/KittenML/KittenTTS-swift.git", revision: "4da0abbb92af4e7faf61affabbdb80d334ea768e"),
     ],
     targets: [
         .target(
@@ -36,35 +35,18 @@ let package = Package(
                 .product(name: "Qwen3TTSCoreML", package: "speech-swift"),
             ]
         ),
-        .target(
-            name: "PythonSubprocessRunner",
-            dependencies: ["TTSHarnessCore"]
-        ),
-        .target(
-            name: "KittenTTSRunner",
-            dependencies: [
-                "TTSHarnessCore",
-                .product(name: "KittenTTS", package: "KittenTTS-swift"),
-            ]
-        ),
         .executableTarget(
             name: "MacTTSCLI",
             dependencies: [
                 "TTSHarnessCore",
                 "FluidAudioRunner",
                 "SpeechSwiftRunner",
-                "PythonSubprocessRunner",
-                "KittenTTSRunner",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
-                .product(name: "KittenTTS", package: "KittenTTS-swift"),
                 .product(name: "FluidAudio", package: "FluidAudio"),
-                .target(name: "KittenCoreMLRunner"),
+                .target(name: "MacTTSKit"),
             ],
             path: "Sources/mac-tts"
         ),
-        .target(name: "KittenCoreMLRunner",dependencies: [
-    .target(name: "TTSHarnessCore"),
-    .product(name: "KittenTTS", package: "KittenTTS-swift"),]),
         .testTarget(
             name: "TTSHarnessCoreTests",
             dependencies: [ "TTSHarnessCore" ],
@@ -76,6 +58,17 @@ let package = Package(
                 "TTSHarnessCore",
                 "FluidAudioRunner"
             ]
+        ),
+        .target(
+            name: "MacTTSKit",
+            dependencies: [
+                "TTSHarnessCore",
+                "FluidAudioRunner"
+            ]
+        ),
+        .testTarget(
+            name: "MacTTSKitTests",
+            dependencies: [ "MacTTSKit", .target(name: "MacTTSCLI"),]
         ),
     ]
 )

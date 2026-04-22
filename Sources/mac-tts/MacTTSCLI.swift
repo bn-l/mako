@@ -6,9 +6,9 @@ import TTSHarnessCore
 struct MacTTS: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "mac-tts",
-        abstract: "Harness to benchmark CoreML/MLX TTS models on the same passage.",
-        subcommands: [List.self, Run.self, KittenMatrix.self, KokoroMatrix.self, KittenProbe.self, KokoroSmooth.self, NormalizePreview.self, TokenizePreview.self, G2PPreview.self],
-        defaultSubcommand: List.self
+        abstract: "Text-to-speech via Kokoro. Outputs M4A if ffmpeg is installed, else WAV.",
+        subcommands: [Say.self, ListVoices.self, Dev.self],
+        defaultSubcommand: Say.self
     )
 }
 
@@ -40,7 +40,7 @@ struct RunMetric: Sendable {
 struct Run: AsyncParsableCommand {
     static let configuration = CommandConfiguration(abstract: "Run synthesis for one or all models.")
 
-    @Option(name: .long, help: "Model id (from `mac-tts list`).")
+    @Option(name: .long, help: "Model id (from `mac-tts dev list`).")
     var model: String?
 
     @Flag(name: .long, help: "Run every model.")
