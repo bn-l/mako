@@ -1,0 +1,1 @@
+- 1 | 2026-04-22 20:46:12: wrapCourseCodes was claiming 'Wait 250' out of 'Wait 250—500 ms' because its trailing lookahead only blocked [0-9A-Za-z] — an en/em dash passed. Added U+2013/U+2014 to the lookahead so ranges stay whole for wrapRanges. All 124 tests pass.
