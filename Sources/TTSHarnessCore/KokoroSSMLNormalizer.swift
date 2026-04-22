@@ -18,6 +18,11 @@ public enum KokoroSSMLNormalizer {
         // drops bare parens, so `(x)` in source renders with no audible pause
         // cue. Em-dashes survive and Kokoro realizes them as prosodic pauses.
         out = wrapParentheticals(out)
+        // Comma → em-dash rewrites, long-sentence split-point injection, and
+        // `; <letter>` de-elision. All three compensate for FluidAudio's
+        // preprocessor stripping commas and KokoroChunker only splitting on
+        // `,;:`. See `reshapeClauseBreaks` for the specifics.
+        out = reshapeClauseBreaks(out)
         // Email/URL must run before any handler that might touch their punctuation.
         out = wrapEmails(out)
         out = wrapURLs(out)
@@ -79,6 +84,7 @@ public enum KokoroSSMLNormalizer {
     public static func compensatorsOnly(_ text: String) -> String {
         var out = text
         out = wrapParentheticals(out)
+        out = reshapeClauseBreaks(out)
         out = wrapEmails(out)
         out = wrapURLs(out)
         out = wrapPhoneNumbers(out)
@@ -858,15 +864,23 @@ public enum KokoroSSMLNormalizer {
         "ASAP", "AWOL", "SNAFU", "FUBAR", "NIMBY", "WASP", "YOLO", "YAML",
     ]
 
-    /// Wrap bare all-caps runs of 2+ letters in `<say-as interpret-as="characters">`.
-    /// Single-capital words are left alone (sentence-initial common words).
-    /// Two-letter runs (AI, TV) get the same treatment — apostrophe-free
-    /// bare letter pairs are typically initialisms. Digits immediately on
-    /// either side of the cap run disqualify the match (those go to
-    /// `wrapAlphaNumericCodes` instead), as do adjacent `<`/`>` which mean
-    /// the caps are already inside an SSML tag.
+    /// Expand bare all-caps runs of 2+ letters into per-letter markdown
+    /// IPA (`[ETA](/ˈiː/) [T](/tˈiː/) [A](/ˈeɪ/)`). Each letter becomes
+    /// its own word-token so FluidAudio's chunker doesn't collapse the
+    /// trailing letter before punctuation (the `<say-as>` path drops
+    /// the last letter before `,`/`.`/`?`, rendering "ETA" as "eee tee"
+    /// and "API" as a clipped "ay-pee"). Dotted letter IPA with `ː`
+    /// length marks gives the natural drawn-out letter-name prosody.
+    ///
+    /// Single-capital words are left alone (sentence-initial common
+    /// words). Two-letter runs (AI, TV) get the same treatment —
+    /// apostrophe-free bare letter pairs are typically initialisms.
+    /// Digits adjacent to the cap run disqualify the match (those go
+    /// to `wrapAlphaNumericCodes`), as do adjacent `<`/`>` (already
+    /// inside an SSML tag) and `[`/`]`/`/` (already inside a markdown
+    /// IPA span).
     private static func wrapInitialisms(_ text: String) -> String {
-        let pattern = #"(?<![A-Za-z0-9<>])[A-Z]{2,}(?![A-Za-z0-9<>])"#
+        let pattern = #"(?<![A-Za-z0-9<>\[\]/])[A-Z]{2,}(?![A-Za-z0-9<>\[\]/])"#
         guard let re = try? NSRegularExpression(pattern: pattern) else { return text }
         let ns = text as NSString
         let matches = re.matches(in: text, range: NSRange(location: 0, length: ns.length))
@@ -875,10 +889,27 @@ public enum KokoroSSMLNormalizer {
             let matched = ns.substring(with: match.range)
             if wordAcronyms.contains(matched) { continue }
             guard let r = Range(match.range, in: out) else { continue }
-            out.replaceSubrange(r, with: #"<say-as interpret-as="characters">\#(matched)</say-as>"#)
+            let pieces = matched.map { ch -> String in
+                let ipa = letterNameIPA[ch] ?? String(ch)
+                return "[\(ch)](/\(ipa)/)"
+            }
+            out.replaceSubrange(r, with: pieces.joined(separator: " "))
         }
         return out
     }
+
+    /// US English letter-name IPA for per-letter acronym spelling.
+    /// `ː` length marks match the Kitten convention for `RSVP`
+    /// (`ˈɑːɹ.ˈɛs.vˈiː.pˈiː.`) and give natural drawn-out prosody.
+    private static let letterNameIPA: [Character: String] = [
+        "A": "ˈeɪ",   "B": "bˈiː",  "C": "sˈiː",  "D": "dˈiː",
+        "E": "ˈiː",   "F": "ˈɛf",   "G": "dʒˈiː", "H": "ˈeɪtʃ",
+        "I": "ˈaɪ",   "J": "dʒˈeɪ", "K": "kˈeɪ",  "L": "ˈɛl",
+        "M": "ˈɛm",   "N": "ˈɛn",   "O": "ˈoʊ",   "P": "pˈiː",
+        "Q": "kjˈuː", "R": "ˈɑːɹ",  "S": "ˈɛs",   "T": "tˈiː",
+        "U": "jˈuː",  "V": "vˈiː",  "W": "dˈʌbəljˌuː",
+        "X": "ˈɛks",  "Y": "wˈaɪ",  "Z": "zˈiː",
+    ]
 
     /// `A/B` slash between two single capital letters reads literally —
     /// "A slash B". English speakers pronounce the character; semantic
@@ -897,6 +928,141 @@ public enum KokoroSSMLNormalizer {
             let source = ns.substring(with: match.range)
             let alias = "\(left) slash \(right)"
             out.replaceSubrange(r, with: #"<sub alias="\#(alias)">\#(source)</sub>"#)
+        }
+        return out
+    }
+
+    /// Compensate for FluidAudio's preprocessor stripping commas and
+    /// `KokoroChunker` only splitting on `,;:` (em-dash is not a split
+    /// character). Three passes, in order:
+    ///
+    /// 1. **Clause-boundary commas → em-dash.** Commas before clause
+    ///    connectives (`and but or so yet nor then however therefore
+    ///    meanwhile still`) and before -ed/-ing serial verbs. Without
+    ///    this, "Lab 3B, glanced at the clock, and said" runs together
+    ///    because every comma is silently dropped pre-synth.
+    /// 2. **Split-point injection.** Sentences over 300 chars that
+    ///    contain no surviving split punctuation (`;`, `:`) have their
+    ///    last em-dash promoted to `;` so the chunker can break the
+    ///    clause instead of hard-cutting mid-word at the 249-token cap.
+    /// 3. **`; <letter>` → `— <letter>`.** Kokoro's acoustic model elides
+    ///    a bare `a`/`I` after a semicolon pause. Demote back to em-dash
+    ///    in this narrow case so the letter survives.
+    private static func reshapeClauseBreaks(_ text: String) -> String {
+        var out = text
+
+        let connectivePattern =
+            #",\s+(and|but|or|so|yet|nor|then|however|therefore|meanwhile|still)\s+"#
+        if let re = try? NSRegularExpression(pattern: connectivePattern, options: .caseInsensitive) {
+            let range = NSRange(location: 0, length: (out as NSString).length)
+            out = re.stringByReplacingMatches(in: out, range: range, withTemplate: " — $1 ")
+        }
+
+        let serialVerbPattern = #",\s+([a-z]+(?:ed|ing))\s+"#
+        if let re = try? NSRegularExpression(pattern: serialVerbPattern) {
+            let range = NSRange(location: 0, length: (out as NSString).length)
+            out = re.stringByReplacingMatches(in: out, range: range, withTemplate: " — $1 ")
+        }
+
+        out = promoteEmDashInLongSentences(out)
+
+        let barePattern = #";\s+([aAI])(?=\s|[.,!?])"#
+        if let re = try? NSRegularExpression(pattern: barePattern) {
+            let range = NSRange(location: 0, length: (out as NSString).length)
+            out = re.stringByReplacingMatches(in: out, range: range, withTemplate: " — $1")
+        }
+
+        return out
+    }
+
+    /// Walk sentence-by-sentence. For any sentence over 300 characters
+    /// that lacks `;` or `:`, convert its last em-dash to `;` so
+    /// `KokoroChunker.splitByPunctuation` has a break point. 300 chars
+    /// roughly maps to 60 words / 240 tokens — close to Kokoro's 249
+    /// long-model cap with BOS/EOS/safety overhead.
+    private static func promoteEmDashInLongSentences(_ text: String) -> String {
+        let ns = text as NSString
+        var pieces: [String] = []
+        var start = 0
+        var i = 0
+        while i < ns.length {
+            let c = ns.character(at: i)
+            if c == 0x2E /* . */ || c == 0x21 /* ! */ || c == 0x3F /* ? */ {
+                // Only treat as sentence-end when followed by whitespace +
+                // capital letter (or end of string). Prevents mid-word splits
+                // inside abbreviations like "U.N." or "a.m."
+                let end = i + 1
+                if isSentenceEnd(ns: ns, periodIndex: i) {
+                    let sentence = ns.substring(with: NSRange(location: start, length: end - start))
+                    pieces.append(promoteLastEmDashIfLong(sentence))
+                    start = end
+                }
+            }
+            i += 1
+        }
+        if start < ns.length {
+            let tail = ns.substring(with: NSRange(location: start, length: ns.length - start))
+            pieces.append(promoteLastEmDashIfLong(tail))
+        }
+        return pieces.joined()
+    }
+
+    private static func isSentenceEnd(ns: NSString, periodIndex: Int) -> Bool {
+        // Need at least one whitespace char immediately after the period —
+        // without it we're inside an abbreviation like `U.N.` where `.` is
+        // followed directly by the next capital letter.
+        let next = periodIndex + 1
+        guard next < ns.length else { return true }
+        let firstAfter = ns.character(at: next)
+        let isWhitespace =
+            firstAfter == 0x20 || firstAfter == 0x09 || firstAfter == 0x0A
+        guard isWhitespace else { return false }
+        var j = next + 1
+        while j < ns.length {
+            let ch = ns.character(at: j)
+            if ch == 0x20 || ch == 0x09 || ch == 0x0A {
+                j += 1
+                continue
+            }
+            if ch >= 0x41 && ch <= 0x5A { return true }
+            if ch == 0x22 || ch == 0x27 { return true }
+            return false
+        }
+        return true
+    }
+
+    private static func hasNonNumericSplit(_ sentence: String) -> Bool {
+        // Strip patterns that later get wrapped into `<sub>` and so do NOT
+        // reach the chunker: times/ratios (`8:45`, `2:1`) and URL schemes
+        // (`https://`). A `:` / `;` in the stripped text is a genuine
+        // surviving split point.
+        var s = sentence
+        s = s.replacingOccurrences(of: #"\d+:\d+"#, with: "", options: .regularExpression)
+        s = s.replacingOccurrences(of: #"https?://"#, with: "", options: .regularExpression)
+        return s.contains(";") || s.contains(":")
+    }
+
+    private static func promoteLastEmDashIfLong(_ sentence: String) -> String {
+        // Threshold picked empirically: the two reflex sentences that
+        // hard-cut post-expansion ("Afterward..." 247 chars, "I left at..."
+        // 201 chars) both clear 200. Source-char length under-counts
+        // post-expansion tokens when the sentence is digit/abbrev-heavy
+        // ("IPv6" → "I P version six", "200 mg" → "two hundred milligram")
+        // so we stay on the aggressive side.
+        guard sentence.count > 200 else { return sentence }
+        // `;` and `:` count as existing chunker split points — but only when
+        // they're NOT inside numeric literals. `8:45` and `2:1` are wrapped
+        // into `<sub alias>` spans downstream and leave no `:` in the text
+        // the chunker sees, so they shouldn't block promotion.
+        if hasNonNumericSplit(sentence) { return sentence }
+        guard let lastDash = sentence.lastIndex(of: "—") else { return sentence }
+        var out = sentence
+        out.replaceSubrange(lastDash...lastDash, with: ";")
+        // Collapse the leading space so we end up with "…require; and …"
+        // rather than "…require ; and …".
+        let before = out.index(before: lastDash)
+        if out[before] == " " {
+            out.remove(at: before)
         }
         return out
     }
