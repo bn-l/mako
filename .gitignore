@@ -25,7 +25,9 @@ wheels/
 # Model outputs / artifacts
 outputs/
 *.wav
+*.m4a
 models/
+scratch/
 
 # Editor
 **/.vscode/*
