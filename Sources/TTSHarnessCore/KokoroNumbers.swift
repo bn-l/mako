@@ -638,8 +638,10 @@ public enum KokoroNumbers {
     private static func wrapCourseCodes(_ text: String) -> String {
         // Cue: capitalized word of 3+ letters. Excludes month names via
         // lookbehind so `September 2026` can't accidentally match (the
-        // 3-digit guard already rules out 4-digit years).
-        let pattern = #"(?<![A-Za-z])([A-Z][A-Za-z]{2,})\s+(\d{3})(?![0-9A-Za-z])"#
+        // 3-digit guard already rules out 4-digit years). The trailing
+        // lookahead additionally rejects en/em dashes so `Wait 250—500`
+        // stays whole for `wrapRanges` to claim as a range.
+        let pattern = "(?<![A-Za-z])([A-Z][A-Za-z]{2,})\\s+(\\d{3})(?![0-9A-Za-z\u{2013}\u{2014}])"
         guard let re = try? NSRegularExpression(pattern: pattern) else { return text }
         let ns = text as NSString
         let matches = re.matches(in: text, range: NSRange(location: 0, length: ns.length))
