@@ -27,7 +27,7 @@ public enum OutputResolverError: Error, Equatable, CustomStringConvertible {
     }
 }
 
-/// Pure output-path resolution for `mac-tts say`. Extracted so the rules —
+/// Pure output-path resolution for `mako say`. Extracted so the rules —
 /// `-o` extension beats `--format`, explicit conflict is a hard error,
 /// `--format auto` falls through to the ffmpeg probe — are testable without
 /// spawning the CLI.

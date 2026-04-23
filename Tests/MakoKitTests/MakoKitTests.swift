@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import MacTTSKit
+@testable import MakoKit
 
 @Suite("OutputResolver")
 struct OutputResolverTests {
@@ -129,8 +129,8 @@ struct OutputResolverTests {
     @Test("-o absolute path preserved")
     func absolutePathPreserved() throws {
         let plan = try OutputResolver.resolve(
-            format: .auto, requested: "/tmp/mac-tts-resolver/sample.m4a", ffmpegAvailable: true)
-        #expect(plan.url.path == "/tmp/mac-tts-resolver/sample.m4a")
+            format: .auto, requested: "/tmp/mako-resolver/sample.m4a", ffmpegAvailable: true)
+        #expect(plan.url.path == "/tmp/mako-resolver/sample.m4a")
         #expect(plan.wantM4A)
     }
 }

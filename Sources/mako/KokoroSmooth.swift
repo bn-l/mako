@@ -8,7 +8,7 @@ import TTSHarnessCore
 /// `KokoroTtsManager` as raw text (per plan checkpoint H decision). The
 /// tool probes post-synthesis smoothing strategies (microfade, crossfade,
 /// silence injection) on chunk seams, which is orthogonal to what the
-/// normalizer does. A/B comparisons against `mac-tts dev run` will differ on
+/// normalizer does. A/B comparisons against `mako dev run` will differ on
 /// normalization, not only on smoothing.
 struct KokoroSmooth: AsyncParsableCommand {
     static let configuration = CommandConfiguration(

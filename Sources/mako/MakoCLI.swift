@@ -3,9 +3,9 @@ import ArgumentParser
 import TTSHarnessCore
 
 @main
-struct MacTTS: AsyncParsableCommand {
+struct Mako: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
-        commandName: "mac-tts",
+        commandName: "mako",
         abstract: "Text-to-speech via Kokoro. Outputs M4A if ffmpeg is installed, else WAV.",
         subcommands: [Say.self, ListVoices.self, Dev.self],
         defaultSubcommand: Say.self
@@ -40,7 +40,7 @@ struct RunMetric: Sendable {
 struct Run: AsyncParsableCommand {
     static let configuration = CommandConfiguration(abstract: "Run synthesis for one or all models.")
 
-    @Option(name: .long, help: "Model id (from `mac-tts dev list`).")
+    @Option(name: .long, help: "Model id (from `mako dev list`).")
     var model: String?
 
     @Flag(name: .long, help: "Run every model.")

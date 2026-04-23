@@ -2,7 +2,7 @@ import Foundation
 import ArgumentParser
 import FluidAudio
 import FluidAudioRunner
-import MacTTSKit
+import MakoKit
 
 extension OutputFormat: ExpressibleByArgument {}
 
@@ -18,7 +18,7 @@ struct Say: AsyncParsableCommand {
     @Option(name: [.short, .long], help: "Output path. Default: out.m4a (with ffmpeg) or out.wav.")
     var output: String?
 
-    @Option(name: .long, help: "Voice id (see `mac-tts list-voices`).")
+    @Option(name: .long, help: "Voice id (see `mako list-voices`).")
     var voice: String = TtsConstants.recommendedVoice
 
     @Option(name: .long, help: "Output format: auto|wav|m4a. Default: auto.")
@@ -34,8 +34,8 @@ struct Say: AsyncParsableCommand {
     }
 }
 
-/// Shared synthesis entry point used by `mac-tts say` and
-/// `mac-tts dev say`. The dev variant sets its environment knobs
+/// Shared synthesis entry point used by `mako say` and
+/// `mako dev say`. The dev variant sets its environment knobs
 /// (`KOKORO_*`) before calling in; everything downstream reads them
 /// through `ProcessInfo.processInfo.environment`.
 func performSay(
@@ -69,7 +69,7 @@ func performSay(
         throw ValidationError("m4a requested but ffmpeg not found on PATH (install with `brew install ffmpeg`)")
     }
     if !plan.wantM4A && format == .auto && ffmpegPath == nil && !quiet {
-        let msg = "mac-tts: ffmpeg not found; writing WAV. Install with `brew install ffmpeg` for M4A.\n"
+        let msg = "mako: ffmpeg not found; writing WAV. Install with `brew install ffmpeg` for M4A.\n"
         FileHandle.standardError.write(Data(msg.utf8))
     }
 
@@ -95,7 +95,7 @@ func transcodeToM4A(wav: Data, outURL: URL, ffmpegPath: String) throws {
         // leaves any existing `outURL` intact.
         let tmpURL = outURL
             .deletingLastPathComponent()
-            .appendingPathComponent(".\(outURL.lastPathComponent).mac-tts-\(UUID().uuidString).tmp")
+            .appendingPathComponent(".\(outURL.lastPathComponent).mako-\(UUID().uuidString).tmp")
         defer { try? FileManager.default.removeItem(at: tmpURL) }
 
         let process = Process()

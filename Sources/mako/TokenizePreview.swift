@@ -15,9 +15,9 @@ import TTSHarnessCore
 /// into this command.
 ///
 /// Usage:
-///   mac-tts dev tokenize-preview --file foot-massage.txt
-///   echo "Dr. O'Brien's at 5:30 a.m." | mac-tts dev tokenize-preview
-///   echo "..." | mac-tts dev tokenize-preview --round-trip
+///   mako dev tokenize-preview --file foot-massage.txt
+///   echo "Dr. O'Brien's at 5:30 a.m." | mako dev tokenize-preview
+///   echo "..." | mako dev tokenize-preview --round-trip
 struct TokenizePreview: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "tokenize-preview",

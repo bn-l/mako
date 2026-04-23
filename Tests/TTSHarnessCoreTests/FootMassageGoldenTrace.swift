@@ -11,7 +11,7 @@ import Testing
 /// Goldens live under `Tests/TTSHarnessCoreTests/Resources/` as
 /// `<name>.ported.golden.txt`. When the pipeline legitimately changes
 /// output, regenerate them with:
-///   swift run mac-tts dev normalize-preview --ported \
+///   swift run mako dev normalize-preview --ported \
 ///       --file Sources/TTSHarnessCore/Resources/<name>.txt \
 ///       > Tests/TTSHarnessCoreTests/Resources/<name>.ported.golden.txt
 /// and include the diff + justification in the PR.
@@ -45,7 +45,7 @@ struct PortedPipelineGoldenTrace {
         // `print`; trim both sides so we compare what the pipeline emits.
         let golden = goldenRaw.trimmingCharacters(in: .whitespacesAndNewlines)
         #expect(actual == golden,
-            "\(name) golden diverged. Regenerate with `mac-tts dev normalize-preview --ported` if change is intentional."
+            "\(name) golden diverged. Regenerate with `mako dev normalize-preview --ported` if change is intentional."
         )
     }
 }

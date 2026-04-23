@@ -1,4 +1,6 @@
-# mac-tts
+# mako
+
+Mac [Kokoro](https://huggingface.co/hexgrad/Kokoro-82M)
 
 Local text-to-speech on macOS via the Kokoro-82M CoreML model (served
 through [FluidAudio](https://github.com/FluidInference/FluidAudio)), with
@@ -12,7 +14,7 @@ Outputs M4A when `ffmpeg` is on `PATH`, WAV otherwise.
 
 ```sh
 swift build -c release
-cp .build/release/mac-tts /usr/local/bin/
+cp .build/release/mako /usr/local/bin/
 ```
 
 Requires macOS 15+ and Apple Silicon.
@@ -20,10 +22,10 @@ Requires macOS 15+ and Apple Silicon.
 ## Usage
 
 ```sh
-mac-tts say "Hello from Kokoro."
-mac-tts say -o out.wav --format wav "Hello."
-echo "Reading from stdin." | mac-tts say -
-mac-tts list-voices
+mako say "Hello from Kokoro."
+mako say -o out.wav --format wav "Hello."
+echo "Reading from stdin." | mako say -
+mako list-voices
 ```
 
 ## Performance
@@ -50,7 +52,7 @@ FluidAudio drops the Kokoro CoreML bundle into
 `~/.cache/fluidaudio/Models/kokoro/` (~774 MB — 5s/15s model variants,
 G2P encoder/decoder, gold/silver lexicons, voice embeddings). It's
 pulled from HuggingFace `FluidInference/kokoro-82m-coreml` on first
-`say`. If the dir is missing or damaged, FluidAudio re-downloads on
+`mako say`. If the dir is missing or damaged, FluidAudio re-downloads on
 next run; there's no offline bundle, so the first invocation needs
 network.
 
@@ -61,7 +63,7 @@ the ported G2P dictionaries).
 
 ## Dev knobs
 
-Exposed under `mac-tts dev say` (run `mac-tts dev say --help` for the
+Exposed under `mako dev say` (run `mako dev say --help` for the
 full list):
 
 - `--g2p ported|classic` — pick the normalizer pipeline. Default

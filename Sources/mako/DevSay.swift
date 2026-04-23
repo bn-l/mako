@@ -1,9 +1,9 @@
 import Foundation
 import ArgumentParser
 import FluidAudio
-import MacTTSKit
+import MakoKit
 
-/// `mac-tts dev say` — the `say` path with the knobs that alter the
+/// `mako dev say` — the `say` path with the knobs that alter the
 /// normalizer / runner wiring exposed as explicit flags. Each flag maps
 /// onto the `KOKORO_*` env var the runner and normalizer already
 /// consume, so scripts can keep using the env form if they prefer.
@@ -23,7 +23,7 @@ struct DevSay: AsyncParsableCommand {
     @Option(name: [.short, .long], help: "Output path. Default: out.m4a (with ffmpeg) or out.wav.")
     var output: String?
 
-    @Option(name: .long, help: "Voice id (see `mac-tts list-voices`).")
+    @Option(name: .long, help: "Voice id (see `mako list-voices`).")
     var voice: String = TtsConstants.recommendedVoice
 
     @Option(name: .long, help: "Output format: auto|wav|m4a.")

@@ -9,9 +9,9 @@ import TTSHarnessCore
 /// (which is still on the classic path until Phase 8 flips the toggle).
 ///
 /// Usage:
-///   mac-tts dev g2p-preview --file foot-massage.txt
-///   echo "I live at 123 Elm Dr." | mac-tts dev g2p-preview
-///   mac-tts dev g2p-preview --file homographs.txt --counts
+///   mako dev g2p-preview --file foot-massage.txt
+///   echo "I live at 123 Elm Dr." | mako dev g2p-preview
+///   mako dev g2p-preview --file homographs.txt --counts
 struct G2PPreview: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "g2p-preview",

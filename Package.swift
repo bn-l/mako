@@ -2,12 +2,12 @@
 import PackageDescription
 
 let package = Package(
-    name: "mac-tts",
+    name: "mako",
     platforms: [
         .macOS(.v15),
     ],
     products: [
-        .executable(name: "mac-tts", targets: ["MacTTSCLI"]),
+        .executable(name: "mako", targets: ["MakoCLI"]),
         .library(name: "TTSHarnessCore", targets: ["TTSHarnessCore"]),
     ],
     dependencies: [
@@ -36,16 +36,16 @@ let package = Package(
             ]
         ),
         .executableTarget(
-            name: "MacTTSCLI",
+            name: "MakoCLI",
             dependencies: [
                 "TTSHarnessCore",
                 "FluidAudioRunner",
                 "SpeechSwiftRunner",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "FluidAudio", package: "FluidAudio"),
-                .target(name: "MacTTSKit"),
+                .target(name: "MakoKit"),
             ],
-            path: "Sources/mac-tts"
+            path: "Sources/mako"
         ),
         .testTarget(
             name: "TTSHarnessCoreTests",
@@ -60,15 +60,15 @@ let package = Package(
             ]
         ),
         .target(
-            name: "MacTTSKit",
+            name: "MakoKit",
             dependencies: [
                 "TTSHarnessCore",
                 "FluidAudioRunner"
             ]
         ),
         .testTarget(
-            name: "MacTTSKitTests",
-            dependencies: [ "MacTTSKit", .target(name: "MacTTSCLI"),]
+            name: "MakoKitTests",
+            dependencies: [ "MakoKit", .target(name: "MakoCLI"),]
         ),
     ]
 )

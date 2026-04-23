@@ -1,7 +1,7 @@
 import Foundation
 import Testing
 
-/// End-to-end tests for the `mac-tts` binary. Hermetic by construction —
+/// End-to-end tests for the `mako` binary. Hermetic by construction —
 /// every case forces `--format wav` so no ffmpeg transcode runs. The
 /// FluidAudio Kokoro synthesis itself is gated behind `INTEGRATION=1`
 /// because it requires a one-time model download; the argument-parsing
@@ -9,22 +9,22 @@ import Testing
 /// `list-voices` and `--help`.
 ///
 /// The binary path is resolved from `CommandLine.arguments[0]` — SwiftPM
-/// places `mac-tts` 4 directories above the xctest runner. The test
-/// target's dependency on `MacTTSCLI` guarantees the binary exists
+/// places `mako` 4 directories above the xctest runner. The test
+/// target's dependency on `MakoCLI` guarantees the binary exists
 /// whenever tests run.
 @Suite("CLI end-to-end")
 struct CLIEndToEndTests {
 
-    /// Locate the built `mac-tts` binary. The xctest runner is spawned
+    /// Locate the built `mako` binary. The xctest runner is spawned
     /// by the system toolchain (so `CommandLine.arguments[0]` points
     /// into Xcode's usr/bin), but the test bundle itself sits at
     /// `.../<config>/<Pkg>PackageTests.xctest/` — walking up from
     /// `Bundle(for: anchor).bundleURL` gives us the config dir where
-    /// SwiftPM also emits the `mac-tts` executable.
+    /// SwiftPM also emits the `mako` executable.
     static func binaryURL() -> URL {
         let bundleURL = Bundle(for: CLIAnchor.self).bundleURL
         let configDir = bundleURL.deletingLastPathComponent()
-        return configDir.appendingPathComponent("mac-tts")
+        return configDir.appendingPathComponent("mako")
     }
 
     struct RunResult {
@@ -41,7 +41,7 @@ struct CLIEndToEndTests {
         let binary = binaryURL()
         try #require(
             FileManager.default.isExecutableFile(atPath: binary.path),
-            "mac-tts binary not found at \(binary.path) — ensure MacTTSCLI is built"
+            "mako binary not found at \(binary.path) — ensure MakoCLI is built"
         )
         let process = Process()
         process.executableURL = binary
@@ -65,7 +65,7 @@ struct CLIEndToEndTests {
         }
         if process.isRunning {
             process.terminate()
-            Issue.record("process timed out after \(timeout)s: mac-tts \(args.joined(separator: " "))")
+            Issue.record("process timed out after \(timeout)s: mako \(args.joined(separator: " "))")
         }
 
         let outData = out.fileHandleForReading.readDataToEndOfFile()
@@ -120,7 +120,7 @@ struct CLIEndToEndTests {
     @Test("say --format m4a + -o .wav errors out")
     func sayOutputConflictErrors() throws {
         let tmp = FileManager.default.temporaryDirectory
-            .appendingPathComponent("mac-tts-cli-\(UUID().uuidString).wav")
+            .appendingPathComponent("mako-cli-\(UUID().uuidString).wav")
         defer { try? FileManager.default.removeItem(at: tmp) }
         let r = try Self.run(["say", "hello", "--format", "m4a", "-o", tmp.path])
         #expect(r.status != 0)
@@ -137,7 +137,7 @@ struct CLIEndToEndTests {
         @Test("say writes a WAV file for a positional argument")
         func sayWritesWavFromArg() throws {
             let tmp = FileManager.default.temporaryDirectory
-                .appendingPathComponent("mac-tts-cli-arg-\(UUID().uuidString).wav")
+                .appendingPathComponent("mako-cli-arg-\(UUID().uuidString).wav")
             defer { try? FileManager.default.removeItem(at: tmp) }
             let r = try CLIEndToEndTests.run(
                 ["say", "Hello there.", "--format", "wav", "-o", tmp.path],
@@ -152,7 +152,7 @@ struct CLIEndToEndTests {
         @Test("say reads from stdin when no argument is given")
         func sayReadsFromStdin() throws {
             let tmp = FileManager.default.temporaryDirectory
-                .appendingPathComponent("mac-tts-cli-stdin-\(UUID().uuidString).wav")
+                .appendingPathComponent("mako-cli-stdin-\(UUID().uuidString).wav")
             defer { try? FileManager.default.removeItem(at: tmp) }
             let r = try CLIEndToEndTests.run(
                 ["say", "--format", "wav", "-o", tmp.path],
@@ -166,7 +166,7 @@ struct CLIEndToEndTests {
         @Test("say '-' reads from stdin")
         func sayDashReadsFromStdin() throws {
             let tmp = FileManager.default.temporaryDirectory
-                .appendingPathComponent("mac-tts-cli-dash-\(UUID().uuidString).wav")
+                .appendingPathComponent("mako-cli-dash-\(UUID().uuidString).wav")
             defer { try? FileManager.default.removeItem(at: tmp) }
             let r = try CLIEndToEndTests.run(
                 ["say", "-", "--format", "wav", "-o", tmp.path],
