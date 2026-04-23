@@ -20,7 +20,7 @@ struct DevSay: AsyncParsableCommand {
     @Argument(help: "Text to synthesize. Use '-' or omit to read from stdin.")
     var text: String?
 
-    @Option(name: [.short, .long], help: "Output path. Default: out.m4a (with ffmpeg) or out.wav.")
+    @Option(name: [.short, .long], help: "Output path. If omitted, audio is played via afplay and no file is written.")
     var output: String?
 
     @Option(name: .long, help: "Voice id (see `mako list-voices`).")

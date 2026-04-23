@@ -9,13 +9,13 @@ extension OutputFormat: ExpressibleByArgument {}
 struct Say: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "say",
-        abstract: "Synthesize speech from text via Kokoro. Writes M4A if ffmpeg is installed, else WAV."
+        abstract: "Synthesize speech from text via Kokoro. Plays via afplay, or writes M4A/WAV when -o is given."
     )
 
     @Argument(help: "Text to synthesize. Use '-' or omit to read from stdin.")
     var text: String?
 
-    @Option(name: [.short, .long], help: "Output path. Default: out.m4a (with ffmpeg) or out.wav.")
+    @Option(name: [.short, .long], help: "Output path. If omitted, audio is played via afplay and no file is written.")
     var output: String?
 
     @Option(name: .long, help: "Voice id (see `mako list-voices`).")
@@ -56,6 +56,14 @@ func performSay(
         throw ValidationError("no input text (pass a string argument or pipe via stdin)")
     }
 
+    let runner = KokoroFluidAudioRunner(voice: voice)
+    let wavData = try await runner.synthesizeData(text: sourceText)
+
+    guard let output else {
+        try playViaAfplay(wav: wavData)
+        return
+    }
+
     let ffmpegPath = findFFmpeg()
     let plan: OutputPlan
     do {
@@ -73,9 +81,6 @@ func performSay(
         FileHandle.standardError.write(Data(msg.utf8))
     }
 
-    let runner = KokoroFluidAudioRunner(voice: voice)
-    let wavData = try await runner.synthesizeData(text: sourceText)
-
     let parent = plan.url.deletingLastPathComponent().path
     if !parent.isEmpty {
         try? FileManager.default.createDirectory(
@@ -86,6 +91,34 @@ func performSay(
         try transcodeToM4A(wav: wavData, outURL: plan.url, ffmpegPath: ffmpegPath)
     } else {
         try wavData.write(to: plan.url, options: .atomic)
+    }
+}
+
+func playViaAfplay(wav: Data) throws {
+    let tmpURL = FileManager.default.temporaryDirectory
+        .appendingPathComponent("mako-\(UUID().uuidString).wav")
+    try wav.write(to: tmpURL, options: .atomic)
+    defer { try? FileManager.default.removeItem(at: tmpURL) }
+
+    let process = Process()
+    process.executableURL = URL(fileURLWithPath: "/usr/bin/afplay")
+    process.arguments = [tmpURL.path]
+    try process.run()
+    process.waitUntilExit()
+
+    guard process.terminationStatus == 0 else {
+        throw PlaybackError.afplayFailed(status: process.terminationStatus)
+    }
+}
+
+enum PlaybackError: Error, CustomStringConvertible {
+    case afplayFailed(status: Int32)
+
+    var description: String {
+        switch self {
+        case let .afplayFailed(status):
+            return "afplay exited \(status)"
+        }
     }
 }
 
