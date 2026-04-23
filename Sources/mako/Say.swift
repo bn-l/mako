@@ -52,12 +52,19 @@ func performSay(
         let data = FileHandle.standardInput.readDataToEndOfFile()
         sourceText = String(data: data, encoding: .utf8) ?? ""
     }
-    guard !sourceText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+    let trimmed = sourceText.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !trimmed.isEmpty else {
         throw ValidationError("no input text (pass a string argument or pipe via stdin)")
     }
+    // Ensure the utterance ends in sentence-final punctuation so the
+    // synth lands on natural trailing silence instead of clipping the
+    // last phoneme. Short inputs like `mako say "Hmm"` are the motivating
+    // case; already-punctuated input is left alone.
+    let sentenceEnders: Set<Character> = [".", "!", "?", "…", ":", ";"]
+    let synthText = sentenceEnders.contains(trimmed.last!) ? trimmed : trimmed + "."
 
     let runner = KokoroFluidAudioRunner(voice: voice)
-    let wavData = try await runner.synthesizeData(text: sourceText)
+    let wavData = try await runner.synthesizeData(text: synthText)
 
     guard let output else {
         try playViaAfplay(wav: wavData)

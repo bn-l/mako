@@ -177,6 +177,19 @@ public enum KokoroG2P {
             // already rejected.
             if homographRules[token.text.lowercased()] != nil { continue }
 
+            // Interjection overlay — the upstream misaki/kokorog2p dicts
+            // ship `hm`/`hmm`/… with phoneme strings that are literally
+            // the orthography (no vowel), which Kokoro renders as a
+            // clipped consonant cluster. Any `hm+` spelling collapses to
+            // a single stressed long-nasal IPA so no matter how many m's
+            // the user types, it reads as a closed-mouth hum rather than
+            // a vowel-based "hum".
+            if isHmInterjection(token.text) {
+                tokens[i].phonemes = hmInterjectionIPA
+                tokens[i].rating = 4
+                continue
+            }
+
             if let hit = KokoroLexicon.lookup(token.text) {
                 tokens[i].phonemes = hit.ipa
                 tokens[i].rating = 4
@@ -667,6 +680,22 @@ public enum KokoroG2P {
         case "Adverb":    return "ADV"
         default:          return nil
         }
+    }
+
+    /// Canonical IPA for any `hm+` thinking-hum interjection. No vowel
+    /// (a `hˈʌm`-shape reads as the word "hum", which isn't what a
+    /// thinking pause sounds like); just a stressed long nasal so the
+    /// mouth-closed humming quality carries. Repeated m's in the input
+    /// spelling are flattened to this single form — the user's intent
+    /// is the same whether they type `Hm`, `Hmm`, or `Hmmmm`.
+    private static let hmInterjectionIPA = "hˈmː"
+
+    /// True iff `text` is an `hm+` interjection (case-insensitive): a
+    /// leading `h` followed by one or more `m`s and nothing else.
+    private static func isHmInterjection(_ text: String) -> Bool {
+        let lower = text.lowercased()
+        guard lower.count >= 2, lower.first == "h" else { return false }
+        return lower.dropFirst().allSatisfy { $0 == "m" }
     }
 
     /// Copula / intensifier words that force DEFAULT when they
