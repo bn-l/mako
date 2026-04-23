@@ -1,6 +1,10 @@
-# mako
+<p align="center">
+  <img src="./assets/logo.webp" alt="mako" width="220">
+</p>
 
-Mac [Kokoro](https://huggingface.co/hexgrad/Kokoro-82M)
+<h1 align="center">mako</h1>
+
+<p align="center"><b>Ma</b>c <b>Ko</b>koro</p>
 
 Local text-to-speech on macOS via the Kokoro-82M CoreML model ([FluidAudio](https://github.com/FluidInference/FluidAudio)), with the [`kokorog2p`](https://github.com/holgern/kokorog2p) normalizer ported and the [G2P pipeline](https://en.wikipedia.org/wiki/Grapheme-to-phoneme) implemented in Swift.
 
