@@ -8,9 +8,17 @@
 
 Local text-to-speech on macOS via the Kokoro-82M CoreML model ([FluidAudio](https://github.com/FluidInference/FluidAudio)), with the [`kokorog2p`](https://github.com/holgern/kokorog2p) normalizer ported and the [G2P pipeline](https://en.wikipedia.org/wiki/Grapheme-to-phoneme) implemented in Swift.
 
-Outputs M4A when `ffmpeg` is on `PATH`, WAV otherwise.
+Plays audio directly via `afplay` by default. With `-o`, writes M4A when `ffmpeg` is on `PATH`, WAV otherwise.
 
 ## Install
+
+Builds from source (no prebuilt bottle):
+
+```sh
+brew install bn-l/tap/mako
+```
+
+Or build it yourself:
 
 ```sh
 swift build -c release
@@ -22,7 +30,8 @@ Requires macOS 15+ and Apple Silicon.
 ## Usage
 
 ```sh
-mako say "Hello from Kokoro."
+mako say "Hello from Kokoro."                  # plays via afplay
+mako say -o out.m4a "Hello."                   # writes a file instead
 mako say -o out.wav --format wav "Hello."
 echo "Reading from stdin." | mako say -
 mako list-voices
