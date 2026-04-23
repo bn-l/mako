@@ -7,6 +7,7 @@ struct Mako: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "mako",
         abstract: "Text-to-speech via Kokoro. Outputs M4A if ffmpeg is installed, else WAV.",
+        version: "0.1.0",
         subcommands: [Say.self, ListVoices.self, Dev.self],
         defaultSubcommand: Say.self
     )
