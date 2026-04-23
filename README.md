@@ -2,11 +2,7 @@
 
 Mac [Kokoro](https://huggingface.co/hexgrad/Kokoro-82M)
 
-Local text-to-speech on macOS via the Kokoro-82M CoreML model (served
-through [FluidAudio](https://github.com/FluidInference/FluidAudio)), with
-a ported [`kokorog2p`](https://github.com/holgern/kokorog2p) normalizer
-+ [G2P pipeline](https://en.wikipedia.org/wiki/Grapheme-to-phoneme)
-implemented in Swift.
+Local text-to-speech on macOS via the Kokoro-82M CoreML model ([FluidAudio](https://github.com/FluidInference/FluidAudio)), with the [`kokorog2p`](https://github.com/holgern/kokorog2p) normalizer ported and the [G2P pipeline](https://en.wikipedia.org/wiki/Grapheme-to-phoneme) implemented in Swift.
 
 Outputs M4A when `ffmpeg` is on `PATH`, WAV otherwise.
 
@@ -30,11 +26,8 @@ mako list-voices
 
 ## Performance
 
-Benchmarked on Apple Silicon (release build, model already cached,
-wall-clock including process start, G2P, CoreML inference, and WAV
-write). Figures aggregated across four prose passages totalling 591
-words / 3,377 characters / ~222 s of synthesized audio. (This actual
-paragraph takes 3.49 s to generate.)
+Benchmarked on M5 (baseline mbp). Figures aggregated across four prose passages totalling 591 words / 3,377 characters / ~222 s of synthesized audio. (This actual
+paragraph takes ~3s to generate.)
 
 | metric             | value          |
 |--------------------|----------------|
@@ -43,28 +36,15 @@ paragraph takes 3.49 s to generate.)
 | chars / sec        | 153            |
 | peak resident set  | ~1.35 GB       |
 
-RTF < 1 means synthesis is faster than playback — a one-minute passage
-synthesizes in roughly six seconds.
+RTF 10x = one-minute clip is rendered in ~6s.
 
 ## Model storage
 
-FluidAudio drops the Kokoro CoreML bundle into
-`~/.cache/fluidaudio/Models/kokoro/` (~774 MB — 5s/15s model variants,
-G2P encoder/decoder, gold/silver lexicons, voice embeddings). It's
-pulled from HuggingFace `FluidInference/kokoro-82m-coreml` on first
-`mako say`. If the dir is missing or damaged, FluidAudio re-downloads on
-next run; there's no offline bundle, so the first invocation needs
-network.
+FluidAudio puts the files it needs into `~/.cache/fluidaudio/Models/kokoro/` (~774 MB of model files, G2P encoder/decoder, gold/silver lexicons, voice embeddings). It's pulled from HuggingFace `FluidInference/kokoro-82m-coreml` on first `mako say`. If the dir is missing, FluidAudio re-downloads it on the next run.
 
-## Binary size
-
-The release binary is ~44 MB (static Swift stdlib + ArgumentParser +
-the ported G2P dictionaries).
-
-## Dev knobs
-
-Exposed under `mako dev say` (run `mako dev say --help` for the
-full list):
+## Development
+ 
+`mako dev say` (run `mako dev say --help` for the full list):
 
 - `--g2p ported|classic` — pick the normalizer pipeline. Default
   `ported`; `classic` falls back to the legacy normalizer.
