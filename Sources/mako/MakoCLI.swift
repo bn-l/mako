@@ -7,7 +7,7 @@ struct Mako: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "mako",
         abstract: "Text-to-speech via Kokoro. Plays via afplay by default; writes M4A/WAV when -o is given.",
-        version: "0.1.0",
+        version: "0.2.0",
         subcommands: [Say.self, ListVoices.self, Dev.self],
         defaultSubcommand: Say.self
     )
