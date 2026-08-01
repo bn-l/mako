@@ -44,6 +44,7 @@ let package = Package(
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "FluidAudio", package: "FluidAudio"),
                 .target(name: "MakoKit"),
+                .target(name: "FishRunner"),
             ],
             path: "Sources/mako"
         ),
@@ -69,6 +70,14 @@ let package = Package(
         .testTarget(
             name: "MakoKitTests",
             dependencies: [ "MakoKit", .target(name: "MakoCLI"),]
+        ),
+        .target(
+            name: "FishRunner",
+            dependencies: [ "TTSHarnessCore" ]
+        ),
+        .testTarget(
+            name: "FishRunnerTests",
+            dependencies: [ "FishRunner" ]
         ),
     ]
 )
