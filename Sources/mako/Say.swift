@@ -2,14 +2,17 @@ import Foundation
 import ArgumentParser
 import FluidAudio
 import FluidAudioRunner
+import FishRunner
 import MakoKit
+import TTSHarnessCore
 
 extension OutputFormat: ExpressibleByArgument {}
 
 struct Say: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "say",
-        abstract: "Synthesize speech from text via Kokoro. Plays via afplay, or writes M4A/WAV when -o is given."
+        abstract: "Synthesize speech from text. Plays via afplay, or writes M4A/WAV when -o is given.",
+        discussion: "Kokoro by default: small, fast, always available. `--hq` switches to fish S2 Pro, which sounds markedly better but loads about 7 GB of weights per call and renders at roughly 2.3x realtime. Run `mako hq install` once before the first `--hq`."
     )
 
     @Argument(help: "Text to synthesize. Use '-' or omit to read from stdin.")
@@ -27,10 +30,17 @@ struct Say: AsyncParsableCommand {
     @Flag(name: .long, help: "Suppress the ffmpeg-missing warning.")
     var quiet: Bool = false
 
+    @OptionGroup var fish: FishFlags
+
+    func validate() throws {
+        try fish.validate()
+    }
+
     func run() async throws {
         try await performSay(
             textArgument: text, output: output, voice: voice,
-            format: format, quiet: quiet)
+            format: format, quiet: quiet,
+            engine: fish.chosenEngine, fishOptions: fish.resolvedOptions())
     }
 }
 
@@ -43,7 +53,9 @@ func performSay(
     output: String?,
     voice: String,
     format: OutputFormat,
-    quiet: Bool
+    quiet: Bool,
+    engine: SpeechEngine = .kokoro,
+    fishOptions: FishOptions = FishOptions()
 ) async throws {
     let sourceText: String
     switch InputSource.decide(argument: textArgument) {
@@ -63,8 +75,14 @@ func performSay(
     let sentenceEnders: Set<Character> = [".", "!", "?", "…", ":", ";"]
     let synthText = sentenceEnders.contains(trimmed.last!) ? trimmed : trimmed + "."
 
-    let runner = KokoroFluidAudioRunner(voice: voice)
-    let wavData = try await runner.synthesizeData(text: synthText)
+    let wavData: Data
+    switch engine {
+    case .kokoro:
+        wavData = try await KokoroFluidAudioRunner(voice: voice).synthesizeData(text: synthText)
+    case .fish:
+        wavData = try await synthesizeViaFish(
+            text: synthText, options: fishOptions, voice: voice, quiet: quiet)
+    }
 
     guard let output else {
         try playViaAfplay(wav: wavData)
@@ -99,6 +117,54 @@ func performSay(
     } else {
         try wavData.write(to: plan.url, options: .atomic)
     }
+}
+
+/// The `--hq` path. Fish writes a file rather than returning bytes, so this renders to a
+/// temp WAV and rejoins the shared output path — `-o`, `--format`, the ffmpeg transcode
+/// and afplay all work exactly as they do for Kokoro.
+///
+/// The whole passage is rendered before anything plays. Streaming batch by batch would
+/// break the cross-batch prosody that made fish worth adding: it feeds each batch's codes
+/// back as context, so later batches are shaped by earlier ones.
+private func synthesizeViaFish(
+    text: String, options: FishOptions, voice: String, quiet: Bool
+) async throws -> Data {
+    if !quiet && voice != TtsConstants.recommendedVoice {
+        warn("--voice selects a Kokoro voice and does nothing with --hq. The high-quality "
+             + "voice comes from the bundled reference clip; use --voice-ref to change it.")
+    }
+
+    let status = FishSetup.status()
+    guard status.uvPath != nil else {
+        throw ValidationError(
+            "--hq needs `uv` on PATH. Install it with `brew install uv`, then run `mako doctor`.")
+    }
+    guard status.weightsPresent == true else {
+        throw ValidationError(
+            "--hq needs the fish weights, which are not downloaded yet. Run `mako hq install` "
+            + "once (about 7 GB), then try again.")
+    }
+
+    if !quiet {
+        // Measured: ~8.2 chars/s of rendering, plus ~20 s to load the weights.
+        let seconds = 20 + Double(text.count) / 8.2
+        if seconds > 60 {
+            warn(String(format: "--hq: about %.0f minutes for %d characters. Nothing plays "
+                        + "until the whole passage is rendered.", seconds / 60, text.count))
+        }
+    }
+
+    let tmpURL = FileManager.default.temporaryDirectory
+        .appendingPathComponent("mako-hq-\(UUID().uuidString).wav")
+    defer { try? FileManager.default.removeItem(at: tmpURL) }
+    var options = options
+    options.progress = !quiet
+    try await FishRunner(options: options).synthesize(text: text, to: tmpURL)
+    return try Data(contentsOf: tmpURL)
+}
+
+func warn(_ message: String) {
+    FileHandle.standardError.write(Data("mako: \(message)\n".utf8))
 }
 
 func playViaAfplay(wav: Data) throws {

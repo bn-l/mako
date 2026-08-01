@@ -16,6 +16,7 @@ struct Dev: AsyncParsableCommand {
             NormalizePreview.self,
             TokenizePreview.self,
             G2PPreview.self,
+            FishPreview.self,
             KokoroMatrix.self,
             KokoroSmooth.self,
         ]

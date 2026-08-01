@@ -50,6 +50,36 @@ struct DevSay: AsyncParsableCommand {
     @Flag(name: .long, help: "Emit the full per-chunk trace + provenance summary (KOKORO_G2P_TRACE).")
     var trace: Bool = false
 
+    @OptionGroup var fish: FishFlags
+
+    @Option(name: .long, help: "--hq: max bytes of text per internal batch (MAKO_FISH_CHUNK_LENGTH).")
+    var chunkLength: Int?
+
+    @Option(name: .long, help: "--hq: max codec tokens per batch; sizes the KV cache (MAKO_FISH_MAX_TOKENS).")
+    var maxTokens: Int?
+
+    @Option(name: .long, help: "--hq: mean silence between batches, seconds (MAKO_FISH_GAP_MEAN).")
+    var gapMean: Double?
+
+    @Option(name: .long, help: "--hq: standard deviation of that silence (MAKO_FISH_GAP_SD).")
+    var gapSd: Double?
+
+    @Option(name: .long, help: "--hq: fade at each batch seam, milliseconds (MAKO_FISH_FADE_MS).")
+    var fadeMs: Double?
+
+    @Option(name: .long, help: "--hq: sampling temperature, overriding the preset (MAKO_FISH_TEMPERATURE).")
+    var temperature: Double?
+
+    @Option(name: .long, help: "--hq: nucleus sampling cutoff, overriding the preset (MAKO_FISH_TOP_P).")
+    var topP: Double?
+
+    @Option(name: .long, help: "--hq: top-k cutoff, overriding the preset (MAKO_FISH_TOP_K).")
+    var topK: Int?
+
+    func validate() throws {
+        try fish.validate()
+    }
+
     func run() async throws {
         if g2p == .classic { setenv("KOKORO_G2P", "classic", 1) }
         if rawText { setenv("KOKORO_RAW_TEXT", "1", 1) }
@@ -57,8 +87,20 @@ struct DevSay: AsyncParsableCommand {
         if previewSsml { setenv("KOKORO_PREVIEW_SSML", "1", 1) }
         if trace { setenv("KOKORO_G2P_TRACE", "1", 1) }
 
+        // Same shape as the KOKORO_* knobs above: the flag sets the env var, and
+        // FishOptions.fromEnvironment picks it up, so scripts can use either form.
+        if let chunkLength { setenv("MAKO_FISH_CHUNK_LENGTH", String(chunkLength), 1) }
+        if let maxTokens { setenv("MAKO_FISH_MAX_TOKENS", String(maxTokens), 1) }
+        if let gapMean { setenv("MAKO_FISH_GAP_MEAN", String(gapMean), 1) }
+        if let gapSd { setenv("MAKO_FISH_GAP_SD", String(gapSd), 1) }
+        if let fadeMs { setenv("MAKO_FISH_FADE_MS", String(fadeMs), 1) }
+        if let temperature { setenv("MAKO_FISH_TEMPERATURE", String(temperature), 1) }
+        if let topP { setenv("MAKO_FISH_TOP_P", String(topP), 1) }
+        if let topK { setenv("MAKO_FISH_TOP_K", String(topK), 1) }
+
         try await performSay(
             textArgument: text, output: output, voice: voice,
-            format: format, quiet: quiet)
+            format: format, quiet: quiet,
+            engine: fish.chosenEngine, fishOptions: fish.resolvedOptions())
     }
 }

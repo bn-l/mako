@@ -6,9 +6,9 @@ import TTSHarnessCore
 struct Mako: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "mako",
-        abstract: "Text-to-speech via Kokoro. Plays via afplay by default; writes M4A/WAV when -o is given.",
-        version: "0.3.0",
-        subcommands: [Say.self, ListVoices.self, Dev.self],
+        abstract: "Text-to-speech. Kokoro by default, fish S2 Pro with --hq. Plays via afplay; writes M4A/WAV when -o is given.",
+        version: "0.4.0",
+        subcommands: [Say.self, ListVoices.self, HQ.self, Doctor.self, Dev.self],
         defaultSubcommand: Say.self
     )
 }

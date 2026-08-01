@@ -2,6 +2,7 @@ import Foundation
 import TTSHarnessCore
 import FluidAudioRunner
 import SpeechSwiftRunner
+import FishRunner
 
 enum RunnerFactory {
     static func make(for entry: ModelEntry) -> Runner {
@@ -17,6 +18,8 @@ enum RunnerFactory {
             return CosyVoiceRunner()
         case .qwen3TtsCoreML:
             return Qwen3TTSCoreMLRunner()
+        case .fish:
+            return FishRunner()
         }
     }
 }

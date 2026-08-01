@@ -4,6 +4,7 @@ public enum Backend: String, Sendable, CaseIterable {
     case fluidAudio
     case speechSwift
     case qwen3TtsCoreML
+    case fish
 }
 
 public struct ModelEntry: Sendable {
@@ -42,6 +43,11 @@ public enum ModelRegistry {
             id: "qwen3-tts-coreml-06b",
             hfRepo: "aufklarer/Qwen3-TTS-CoreML",
             backend: .qwen3TtsCoreML
+        ),
+        .init(
+            id: "fish-s2-pro",
+            hfRepo: "mlx-community/fish-audio-s2-pro-8bit",
+            backend: .fish
         ),
     ]
 
