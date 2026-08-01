@@ -1,0 +1,15 @@
+[soft tone] The overnight reports are in, and none of them are urgent. [whispering] I checked twice before I woke you.
+
+[slow] Read the third line of the invoice carefully before you approve it, because the reference number changed last week.
+
+[sad][whispering] The customer we onboarded in March has cancelled. [excited][laughing] But the migration finished early and nothing broke!
+
+[slightly sad] The renewal did not go through. [very excited] The new contract is worth three times as much!
+
+[confident] The fix is correct and the tests prove it. [curious] What I still do not understand is why it only failed on Safari.
+
+[sarcastic] Naturally, the bug only appears in production. [determined] Right. We find it today.
+
+The release goes out at four. [break] Unless the export tests fail again. [long-break] They will not fail again.
+
+The meeting moved to [emphasis] Thursday, and the deadline moved to [emphasis] Monday.

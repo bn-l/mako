@@ -1,0 +1,1 @@
+Morning, Robert. Here's the list. Start by checking the overnight error reports. Look for anything affecting payments, sign-in, or saved data. The main job is the Safari sign-in bug, so reproduce it and write the smallest safe fix.

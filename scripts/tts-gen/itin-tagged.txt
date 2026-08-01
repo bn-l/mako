@@ -1,0 +1,29 @@
+[warm, like a trusted colleague starting the day] Morning, Robert. Here's the list.
+
+[matter-of-fact, steady] Start by checking the overnight error reports. Look for anything affecting payments, sign-in, or saved data. Ignore isolated warnings unless they point to a real user problem.
+
+[focused] The main job is the Safari sign-in bug. Reproduce it, identify the cause, and write the smallest safe fix. [firm but friendly] Don't use it as an excuse to rebuild authentication.
+
+Once the fix passes the existing tests, deploy it and check production yourself.
+
+Next, answer support messages. Deal with people who are blocked first. Save feature requests in the backlog, but don't promise dates.
+
+[reassuring] You decided last month that every user request does not need to become a feature. The product gets better when you choose carefully, not when you add everything.
+
+After that, update the onboarding page. Several users are missing the import step, so rewrite that section and add one screenshot. This is a documentation problem until the evidence says otherwise.
+
+Publish the weekly build when the sign-in fix and onboarding update are ready. The release notes only need to explain what changed and who it affects.
+
+[quietly encouraging] You've stopped treating a release as a final judgment on the product. It's one version. If something needs changing, you can change it.
+
+Before finishing, review the backlog and select one task for tomorrow. Don't reorganize the entire board.
+
+[slowing down, deliberate] Today's reminders:
+
+A reported problem deserves investigation, not panic.
+
+More features do not automatically make a better product.
+
+[warm, encouraging] Shipping a small fix is still shipping.
+
+[crisp and decisive] Start with the error reports. Then fix sign-in.

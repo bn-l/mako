@@ -1,0 +1,53 @@
+[warm, like a trusted colleague starting the day] Morning, Robert. It's Thursday, it's colder than yesterday, and you have more room than you think.
+
+[matter-of-fact, steady] Start with the overnight error reports. There are eleven, which sounds worse than it is. Nine are the same timeout on the image service, one is a genuine crash in the export path, and one is somebody's browser extension quarrelling with our stylesheet. Deal with the crash. Leave the extension alone.
+
+[focused] The export crash matters because it loses work. A customer clicked Export, the tab froze, and the draft they had spent an hour on did not survive. That is the sort of failure people do not report twice. They simply stop using the feature, and then stop using the product.
+
+Reproduce it before you theorise. Open a large document, add three tables and a chart, and export to PDF. If it survives that, add a footnote with a long URL. The stack trace points at the pagination step, but stack traces point at where things fell over, not where they were pushed.
+
+[firm but friendly] When you find it, write the smallest fix that holds. You have been eyeing that rendering module for months. Today is not the day. Fix the crash, ship the fix, and put the rewrite in the backlog where it can wait its turn like everything else.
+
+Once the tests pass, deploy and watch production for ten minutes. Not thirty seconds, and not the rest of the afternoon. Ten minutes, watching the error rate and the export counter, and then close the tab and move on.
+
+[shifting gear] Next, the support queue. There are twenty-three open threads. Six people are blocked and cannot work. Answer those first, and answer them properly, with what you found and what happens next, not with an acknowledgement that says nothing.
+
+Four of the remaining threads are feature requests dressed as bug reports. That is not dishonesty on their part. When a product does not do what someone expects, it feels broken to them, and the distinction only matters to us. Log them, thank the person, and be honest that it is not coming this month.
+
+[reassuring] You decided in the spring that not every request becomes a feature, and you have held that line better than you give yourself credit for. The version you shipped in June is smaller than the one you designed in March, and it is better. That was not luck. That was you saying no eleven times.
+
+After the queue, the onboarding page. The numbers are unambiguous: sixty-one percent of new accounts never complete the import step. They arrive, they read, they get to the part where they need to bring their own data in, and they leave. Nobody is confused about what the product does. They are confused about how to begin.
+
+Rewrite that section. One screenshot of the import dialogue, three numbered steps, and a plain sentence about which file formats work. Delete the paragraph about the architecture. Nobody reaching that page cares how it works internally, and the people who do care will find it elsewhere.
+
+[thoughtful] Treat this as a documentation problem until the evidence says otherwise. It might turn out to be a design problem. The import button might be in the wrong place, or worded badly, or too easy to walk past. But you can rewrite a page this afternoon and measure the result by Tuesday, and that is cheaper than redesigning a flow on a hunch.
+
+Around one o'clock, stop. Actually stop, away from the desk, with food that is not eaten over a keyboard. You have noticed that the afternoons where you skip lunch are the afternoons where you make the fiddly mistakes, and then spend the evening finding them.
+
+[steady again] The afternoon has two blocks. The first is the weekly build. The sign-in fix and the onboarding update both go in. The release notes need three lines: what changed, who it affects, and what to do if the import still fails. No changelog poetry.
+
+The second block is the thing you have been postponing, which is the database migration plan. Not the migration. The plan. Write down what moves, in what order, what breaks if it stops halfway, and how you would undo it at two in the morning with a phone in one hand. If you cannot write the undo step, you do not have a plan, you have an intention.
+
+[quietly encouraging] You have stopped treating a release as a verdict on your worth, and it shows in how you work. A release is one version. If something is wrong, you change it and release again. That took you three years to learn and about six weeks to start believing.
+
+At four, there is the call with Priya about the contract renewal. She will ask about the roadmap. Tell her what is genuinely planned, say clearly which parts are not committed, and do not invent a date to fill a silence. She has been a customer for two years, and the reason she stays is that you have never once oversold her.
+
+[lighter] A few practical things for the day itself. It is four degrees this morning and it will not get much above nine, so the grey coat rather than the jacket. Rain is likely between two and four, heavy enough to matter for about twenty minutes. If you are walking to the call, leave ten minutes earlier than feels necessary.
+
+The bakery on Hill Street is shut for refurbishment until the ninth, which you will forget and remember again standing outside it. The one by the station is fine, and the queue moves faster than it looks.
+
+[practical] Your car is due for its service on the twelfth, which is a Wednesday, which is the day you usually work from the office. Move one of them now rather than discovering the clash on the morning. It takes ninety seconds and it saves an argument with yourself later.
+
+[slowing down] Before you finish, two small things. Review the backlog and pick exactly one task for tomorrow morning, so you begin the day with a decision already made. And close the seventeen browser tabs. They are not a to-do list. They are a museum of intentions.
+
+[deliberate] Today's reminders, and then I'll leave you to it.
+
+A reported problem deserves investigation, not alarm. The difference between the two is whether you are still able to think.
+
+More features do not make a better product. Fewer, chosen well, and finished properly, almost always do.
+
+Shipping a small fix is still shipping. The size of the change is not the measure of the day.
+
+[warm, encouraging] And the thing you keep forgetting: the work you did yesterday still counts today. It does not reset overnight. The export bug does not erase the sign-in fix, and tomorrow's problem will not erase this afternoon's.
+
+[crisp and decisive] Right. Error reports first. Then the export crash. Everything else can wait its turn.
