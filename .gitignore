@@ -26,6 +26,10 @@ wheels/
 outputs/
 *.wav
 *.m4a
+# ...except the bundled `--hq` voice, which is a source asset rather than an output.
+# Fish clones in context, so there is no per-voice model to build: the clip and its
+# transcript ship inside the binary and a clone cannot happen without them.
+!Sources/TTSHarnessCore/Resources/*.wav
 models/
 scratch/
 
@@ -34,10 +38,15 @@ scratch/
 .idea/
 *.sw?
 
+# Local clone of the speech-swift dependency, kept beside the package for reading
+# its sources. It is its own git repo, so it can never be committed here anyway.
+speech-swift/
+
 # Claude related
 **/.env
 src.md
 **/CLAUDE.md
+.clemp-lock.yaml
 **/.claude
 **/AGENTS.md
 **/.agent/
