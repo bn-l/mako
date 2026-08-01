@@ -1,0 +1,18 @@
+[
+  {
+    "index": 21,
+    "wav": "gemini2-21.wav",
+    "txt": "gemini2-21.txt",
+    "start": 0.0,
+    "end": 14.39,
+    "transcript": "At 7.03 a.m. on Tuesday, Dr. Eleanor Vile stepped onto platform 4B with a canvas satchel, two overwrite pairs, and a note that read, Meet me at the old clock."
+  },
+  {
+    "index": 22,
+    "wav": "gemini2-22.wav",
+    "txt": "gemini2-22.txt",
+    "start": 0.0,
+    "end": 29.31,
+    "transcript": "At 7.03 a.m. on Tuesday, Dr. Eleanor Vile stepped onto platform 4B with a canvas satchel, two overwrite pairs, and a note that read, Meet me at the old clock. No, not that clock. The station announcer, speaking in a calm but faintly metallic voice, said, The 705 service to St. Ives, via Northbridge, will depart from platform 4."
+  }
+]
