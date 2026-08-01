@@ -177,6 +177,128 @@ struct CLIEndToEndTests {
             #expect(FileManager.default.fileExists(atPath: tmp.path))
         }
     }
+
+    // MARK: - `--hq` surface (no synthesis required)
+
+    @Suite("CLI --hq surface")
+    struct HQSurfaceTests {
+
+        /// Fish clones in context, so a reference clip without its transcript is not a
+        /// degraded clone — it is a differently-voiced one. Cheaper to refuse.
+        @Test("--voice-ref without --voice-ref-text is refused")
+        func voiceRefNeedsTranscript() throws {
+            let r = try CLIEndToEndTests.run(
+                ["say", "--hq", "--voice-ref", "/tmp/ref.wav", "hello"])
+            #expect(r.status != 0)
+            #expect((r.stdout + r.stderr).contains("--voice-ref-text"))
+        }
+
+        /// Silently dropping a fish-only option under Kokoro would mean the user hears
+        /// something other than what they asked for and has no way to tell.
+        @Test("fish-only options without --hq are refused")
+        func fishOptionsRequireHQ() throws {
+            let r = try CLIEndToEndTests.run(["say", "--preset", "warm", "hello"])
+            #expect(r.status != 0)
+            #expect((r.stdout + r.stderr).contains("--hq"))
+        }
+
+        @Test("--hq and --engine kokoro together are refused")
+        func contradictoryEngineIsRefused() throws {
+            let r = try CLIEndToEndTests.run(
+                ["say", "--hq", "--engine", "kokoro", "hello"])
+            #expect(r.status != 0)
+        }
+
+        @Test("an unknown preset names the valid ones")
+        func unknownPresetIsHelpful() throws {
+            let r = try CLIEndToEndTests.run(["say", "--hq", "--preset", "spicy", "hello"])
+            #expect(r.status != 0)
+            #expect((r.stdout + r.stderr).contains("hot"))
+        }
+
+        /// `mako hq` is a verb-only namespace. If it ever gained a text positional,
+        /// `mako "some text"` would become ambiguous against the default subcommand.
+        @Test("hq takes no text of its own")
+        func hqIsVerbOnly() throws {
+            let r = try CLIEndToEndTests.run(["hq", "Say this out loud."])
+            #expect(r.status != 0)
+        }
+
+        /// Must answer from cache and reach no network — see `FishSetup`, which passes
+        /// `--offline` precisely so a cold machine cannot be made to provision an
+        /// environment just to be told it is not provisioned.
+        @Test("doctor answers quickly and reports every dependency")
+        func doctorReportsDependencies() throws {
+            let started = Date()
+            let r = try CLIEndToEndTests.run(["doctor"], timeout: 30)
+            #expect(Date().timeIntervalSince(started) < 20)
+            let combined = r.stdout + r.stderr
+            for expected in ["uv", "sidecar", "voice reference", "weights"] {
+                #expect(combined.contains(expected))
+            }
+        }
+    }
+
+    // MARK: - `--hq` synthesis (gated — needs ~7 GB of weights and ~15 GB of RAM)
+
+    /// Both guards are live for anything in here: the sidecar arms its own in-process
+    /// oomguard, and mako polls memory in the parent and SIGKILLs the child's process
+    /// group. A render started from a test is therefore guarded by construction.
+    @Suite("CLI --hq synthesis",
+           .enabled(if: ProcessInfo.processInfo.environment["INTEGRATION"] != nil))
+    struct HQSynthesisTests {
+
+        @Test("--hq writes a WAV in the bundled voice")
+        func hqWritesWav() throws {
+            let tmp = FileManager.default.temporaryDirectory
+                .appendingPathComponent("mako-hq-\(UUID().uuidString).wav")
+            defer { try? FileManager.default.removeItem(at: tmp) }
+            let r = try CLIEndToEndTests.run(
+                ["say", "--hq", "--format", "wav", "-o", tmp.path,
+                 "The report is finished."],
+                timeout: 300)
+            #expect(r.status == 0, "stderr: \(r.stderr)")
+            let size = try FileManager.default
+                .attributesOfItem(atPath: tmp.path)[.size] as? Int ?? 0
+            // 16-bit mono at 44.1 kHz: at least a second of speech, and not the
+            // whole passage's worth, which would mean the text was mis-segmented.
+            #expect(size > 88_200)
+            #expect(size < 44_100 * 2 * 60)
+        }
+
+        /// The kill path is the reason the whole watchdog exists, so it gets exercised
+        /// rather than assumed. An absurd floor makes the first poll trip.
+        @Test("a watchdog kill fails with a reason, not a bare signal")
+        func watchdogKillIsExplained() throws {
+            let tmp = FileManager.default.temporaryDirectory
+                .appendingPathComponent("mako-hq-oom-\(UUID().uuidString).wav")
+            defer { try? FileManager.default.removeItem(at: tmp) }
+            setenv("MAKO_OOM_FLOOR_MB", "1000000", 1)
+            defer { unsetenv("MAKO_OOM_FLOOR_MB") }
+            let r = try CLIEndToEndTests.run(
+                ["say", "--hq", "--format", "wav", "-o", tmp.path, "The report is finished."],
+                timeout: 300)
+            #expect(r.status != 0)
+            let combined = r.stdout + r.stderr
+            #expect(combined.localizedCaseInsensitiveContains("out of memory"))
+            #expect(combined.contains("--hq"))
+        }
+
+        @Test("--engine kokoro still takes the Kokoro path")
+        func kokoroEngineUnaffected() throws {
+            let tmp = FileManager.default.temporaryDirectory
+                .appendingPathComponent("mako-kokoro-\(UUID().uuidString).wav")
+            defer { try? FileManager.default.removeItem(at: tmp) }
+            let started = Date()
+            let r = try CLIEndToEndTests.run(
+                ["say", "--engine", "kokoro", "--format", "wav", "-o", tmp.path,
+                 "The report is finished."],
+                timeout: 180)
+            #expect(r.status == 0, "stderr: \(r.stderr)")
+            // Kokoro runs faster than realtime; fish needs ~20 s just to load.
+            #expect(Date().timeIntervalSince(started) < 60)
+        }
+    }
 }
 
 /// Anchor class used only for `Bundle(for:)` — Swift Testing suites are
