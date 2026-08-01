@@ -5,7 +5,9 @@
 .build/
 .swiftpm/
 .xcbuild/
-Package.resolved
+# Package.resolved IS tracked. mako ships as an executable, and every dependency is
+# declared with `from:`, so an untracked lockfile means Homebrew builds whatever is
+# latest at install time rather than what was tested.
 *.xcodeproj/
 *.xcworkspace/
 DerivedData/
